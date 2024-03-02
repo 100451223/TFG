@@ -438,8 +438,8 @@ public class QuadrupedAgent : Agent
         /// <summary>
         /// Add a negative reward if the agent is sliding
         /// </summary>
-        void addSlidePunishment(){
-            if (backLowerLeg_L.GetComponent<checkGrounded>().pawIsGrounded()){
+        private void addSlidePunishment(){
+            if (backLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()){
                 // If the foot is touching the ground, linear velocity should be near 0
                 // Add a negative reward bigger the further the velocity is from 0
                 AddReward(Mathf.Abs((joints[backLowerLeg_L].rigidbody.velocity.x + 
@@ -447,7 +447,7 @@ public class QuadrupedAgent : Agent
                            joints[backLowerLeg_L].rigidbody.velocity.z)/3) * -0.1f);
             }
 
-            if (backLowerLeg_R.GetComponent<checkGrounded>().pawIsGrounded()){
+            if (backLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()){
                 // If the foot is touching the ground, linear velocity should be near 0
                 // Add a negative reward bigger the further the velocity is from 0
                 AddReward(Mathf.Abs((joints[backLowerLeg_R].rigidbody.velocity.x + 
@@ -455,7 +455,7 @@ public class QuadrupedAgent : Agent
                            joints[backLowerLeg_R].rigidbody.velocity.z)/3) * -0.1f);
             }
 
-            if (frontLowerLeg_L.GetComponent<checkGrounded>().pawIsGrounded()){
+            if (frontLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()){
                 // If the foot is touching the ground, linear velocity should be near 0
                 // Add a negative reward bigger the further the velocity is from 0
                 AddReward(Mathf.Abs((joints[frontLowerLeg_L].rigidbody.velocity.x + 
@@ -463,12 +463,33 @@ public class QuadrupedAgent : Agent
                            joints[frontLowerLeg_L].rigidbody.velocity.z)/3) * -0.1f);
             }
 
-            if (frontLowerLeg_R.GetComponent<checkGrounded>().pawIsGrounded()){
+            if (frontLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()){
                 // If the foot is touching the ground, linear velocity should be near 0
                 // Add a negative reward bigger the further the velocity is from 0
                 AddReward(Mathf.Abs((joints[frontLowerLeg_R].rigidbody.velocity.x + 
                            joints[frontLowerLeg_R].rigidbody.velocity.y + 
                            joints[frontLowerLeg_R].rigidbody.velocity.z)/3) * -0.1f);
+            }
+        }
+
+        /// <summary>
+        /// Add a negative reward if the agent's elbows are touching the ground
+        /// </summary>
+        /// <returns>
+        /// True if the agent's elbows are touching the ground, false otherwise
+        /// </returns>
+        private void addElbowStepPunsihment(){
+            if (frontUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()){
+                AddReward(-0.1f);
+            }
+            if (frontUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()){
+                AddReward(-0.1f);
+            }
+            if (backUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()){
+                AddReward(-0.1f);
+            }
+            if (backUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()){
+                AddReward(-0.1f);
             }
         }
 
@@ -480,7 +501,7 @@ public class QuadrupedAgent : Agent
             // Height of the agent relative to the ground (size 1)
             sensor.AddObservation(checkGroundDistance());
 
-            // Rotation of the agent relative to the reference origin of this agent (size 4)
+            // Rotation vector from the agent's forward to the target's position on the XZ axis (size 4)
             Vector3 agentForward = Vector3.Normalize(transform.forward);
             agentForward.y = 0;
             Vector3 agentToTarget = Vector3.Normalize(target.transform.position - transform.position);
@@ -517,23 +538,30 @@ public class QuadrupedAgent : Agent
             sensor.AddObservation(joints[backWaist_R].rigidbody.angularVelocity.z);
 
 
-            // isFootGrounded, linear velocity (size 4, 4*3)
-            sensor.AddObservation(frontLowerLeg_R.GetComponent<checkGrounded>().pawIsGrounded());
+            // isFootGrounded, linear velocity (size 4, 4*3=12)
+            sensor.AddObservation(frontLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded());
             sensor.AddObservation(joints[frontLowerLeg_R].rigidbody.velocity);
-            sensor.AddObservation(frontLowerLeg_L.GetComponent<checkGrounded>().pawIsGrounded());
+            sensor.AddObservation(frontLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded());
             sensor.AddObservation(joints[frontLowerLeg_L].rigidbody.velocity);
-            sensor.AddObservation(backLowerLeg_R.GetComponent<checkGrounded>().pawIsGrounded());
+            sensor.AddObservation(backLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded());
             sensor.AddObservation(joints[backLowerLeg_R].rigidbody.velocity);
-            sensor.AddObservation(backLowerLeg_L.GetComponent<checkGrounded>().pawIsGrounded());
+            sensor.AddObservation(backLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded());
             sensor.AddObservation(joints[backLowerLeg_L].rigidbody.velocity);
+
+            // isElbowGrounded (size 4)
+            sensor.AddObservation(frontUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded());
+            sensor.AddObservation(frontUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded());
+            sensor.AddObservation(backUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded());
+            sensor.AddObservation(backUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded());
 
             // This Velocity (3)
             Vector3 thisVelocity = GetComponent<Rigidbody>().velocity;
             sensor.AddObservation(thisVelocity);
 
+            // Distance to the target (size 1)
             sensor.AddObservation(Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true));
         
-            // Total observation space size: 3 + 1 + 4 + 24 + 4 + 4*3 + 3 = 49
+            // Total observation space size: 3 + 1 + 4 + 24 + 4 + 12 + 4 + 3 + 1 = 52
         
         }
 
@@ -559,10 +587,10 @@ public class QuadrupedAgent : Agent
             float groundAlignmentLikenessNormalized = (groundAlignmentLikeness + 1.0f) * 0.5f;
             AddReward(- (1 - groundAlignmentLikenessNormalized));
             if (- (1 - groundAlignmentLikenessNormalized) > 0){
-                Debug.Log("fuck ground alignment");
+                Debug.Log("Something is wrong with the ground alignment reward");
             }
             if (groundAlignmentLikeness == -999){
-                Debug.Log("fuck where is the ground");
+                Debug.Log("No ground below the agent");
             }
 
             // Reward the agent if the velocity of the body is similar to the target velocity
@@ -572,11 +600,14 @@ public class QuadrupedAgent : Agent
             float velocityClamped01 = Mathf.Clamp01(velocityLikeness);
             AddReward(- (1 - velocityClamped01));
             if(- (1 - velocityClamped01) > 0){
-                Debug.Log("fuck velocity match");
+                Debug.Log("Something is wrong with the velocity reward");
             }
 
             // Punish the agent for sliding
             addSlidePunishment();
+
+            // Punish the agent if the elbows are touching the ground
+            addElbowStepPunsihment();
 
             // Reward reduction of distance to the target
             float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
