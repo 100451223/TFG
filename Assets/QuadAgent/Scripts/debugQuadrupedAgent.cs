@@ -1,14 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.MLAgents;
-using Unity.MLAgents.Sensors;
-using Unity.MLAgents.Actuators;
 using JointSpace;
 using UtilitiesSpace;
 using UnityEngine.InputSystem;
 
-public class QuadrupedAgent : Agent
+public class debugQuadrupedAgent : MonoBehaviour
 {
 
     [Header("Quadruped's Joints")]
@@ -52,6 +49,9 @@ public class QuadrupedAgent : Agent
         public float checkVelocityMatch(){
             Vector3 thisVelocity = GetComponent<Rigidbody>().velocity;
             // Y axis might be causing troubles? Or slowing down convergence?
+            // Vector3 agentToTarget = Vector3.Normalize(target.transform.position - transform.position) * speed;
+            // agentToTarget.y = 0;
+            // Debug.DrawRay(new Vector3(transform.position.x, 0.0f, transform.position.z), agentToTarget, Color.yellow);
             Vector3 targetVelocity = transform.forward * speed;
             return Utilities.vectorLikeness(thisVelocity, targetVelocity);
         }
@@ -268,6 +268,14 @@ public class QuadrupedAgent : Agent
             return result;
         }
 
+        public Transform joint;
+        [Range (-1f, 1f)]
+        public float x;
+        [Range (-1f, 1f)]
+        public float y;
+        [Range (-1f, 1f)]
+        public float z;
+        public float strength;
         /// <summary>
         /// Move the articulation to the target rotation with the given strength
         /// </summary>
@@ -289,7 +297,7 @@ public class QuadrupedAgent : Agent
             {
                 positionSpring = 50000,
                 positionDamper = 10000,
-                maximumForce = effectiveStrength
+                maximumForce = strength
             };
             articulation.joint.slerpDrive = jd;
             articulation.effectiveStrength = effectiveStrength;
@@ -343,7 +351,7 @@ public class QuadrupedAgent : Agent
         {
             float angle = checkGroundAlignment();
 
-            if (debug) Debug.Log("Angle: " + angle);
+            // if (debug) Debug.Log("Angle: " + angle);
 
             if (angle < threshold){
                 if (debug) Debug.Log("Agent fell");
@@ -411,262 +419,33 @@ public class QuadrupedAgent : Agent
 
     #endregion
 
-    #region MLAGENTS
-
-        public override void Initialize(){
-            // Set up the joints: save initial position, rotation & others
-            setUpJoints();
-            // Get the ground width and height of the ground
-            getGroundWidthHeight();
-            // Set random starting position for the target
-            setRandomTargetPosition();
-            // Set random starting position for the agent
-            setRandomAgentPosition();
-            // Set the agents distance to the target
-            
-            prevDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
-        }
-
-        public override void OnEpisodeBegin()
-        {
-            // Reset the joints: initial position and rotation, zero out velocity. Set random position for the agent
-            ResetAgent();
-            // Set random starting position for the target
-            ResetTarget();
-        }
-
-        /// <summary>
-        /// Add a negative reward if the agent is sliding
-        /// </summary>
-        private void addSlidePunishment(){
-            if (backLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()){
-                // If the foot is touching the ground, linear velocity should be near 0
-                // Add a negative reward bigger the further the velocity is from 0
-                AddReward(Mathf.Abs((joints[backLowerLeg_L].rigidbody.velocity.x + 
-                           joints[backLowerLeg_L].rigidbody.velocity.y + 
-                           joints[backLowerLeg_L].rigidbody.velocity.z)/3) * -0.1f);
-            }
-
-            if (backLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()){
-                // If the foot is touching the ground, linear velocity should be near 0
-                // Add a negative reward bigger the further the velocity is from 0
-                AddReward(Mathf.Abs((joints[backLowerLeg_R].rigidbody.velocity.x + 
-                           joints[backLowerLeg_R].rigidbody.velocity.y + 
-                           joints[backLowerLeg_R].rigidbody.velocity.z)/3) * -0.1f);
-            }
-
-            if (frontLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()){
-                // If the foot is touching the ground, linear velocity should be near 0
-                // Add a negative reward bigger the further the velocity is from 0
-                AddReward(Mathf.Abs((joints[frontLowerLeg_L].rigidbody.velocity.x + 
-                           joints[frontLowerLeg_L].rigidbody.velocity.y + 
-                           joints[frontLowerLeg_L].rigidbody.velocity.z)/3) * -0.1f);
-            }
-
-            if (frontLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()){
-                // If the foot is touching the ground, linear velocity should be near 0
-                // Add a negative reward bigger the further the velocity is from 0
-                AddReward(Mathf.Abs((joints[frontLowerLeg_R].rigidbody.velocity.x + 
-                           joints[frontLowerLeg_R].rigidbody.velocity.y + 
-                           joints[frontLowerLeg_R].rigidbody.velocity.z)/3) * -0.1f);
-            }
-        }
-
-        /// <summary>
-        /// Add a negative reward if the agent's elbows are touching the ground
-        /// </summary>
-        /// <returns>
-        /// True if the agent's elbows are touching the ground, false otherwise
-        /// </returns>
-        private void addElbowStepPunsihment(){
-            if (frontUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()){
-                AddReward(-1f);
-            }
-            if (frontUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()){
-                AddReward(-1f);
-            }
-            if (backUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()){
-                AddReward(-1f);
-            }
-            if (backUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()){
-                AddReward(-1f);
-            }
-        }
-
-        public override void CollectObservations(VectorSensor sensor)
-        {
-            // Position of the target relative to the reference origin of this agent (size 3)
-            sensor.AddObservation(target.position);
-
-            // Height of the agent relative to the ground (size 1)
-            sensor.AddObservation(checkGroundDistance());
-
-            // Rotation vector from the agent's forward to the target's position on the XZ axis (size 4)
-            Vector3 agentForward = Vector3.Normalize(transform.forward);
-            agentForward.y = 0;
-            Vector3 agentToTarget = Vector3.Normalize(target.transform.position - transform.position);
-            agentToTarget.y = 0;
-
-            sensor.AddObservation(Quaternion.FromToRotation(agentForward, agentToTarget));
-
-            // Rotation, angular velocity of the joint's allowed axis (size 24)
-            // The upper and lower legs only rotate on the X axis
-            sensor.AddObservation(frontLowerLeg_L.localRotation.x);
-            sensor.AddObservation(joints[frontLowerLeg_L].rigidbody.angularVelocity.x);
-            sensor.AddObservation(frontUpperLeg_L.localRotation.x);
-            sensor.AddObservation(joints[frontUpperLeg_L].rigidbody.angularVelocity.x);
-            sensor.AddObservation(frontLowerLeg_R.localRotation.x);
-            sensor.AddObservation(joints[frontLowerLeg_R].rigidbody.angularVelocity.x);
-            sensor.AddObservation(frontUpperLeg_R.localRotation.x);
-            sensor.AddObservation(joints[frontUpperLeg_R].rigidbody.angularVelocity.x);
-            sensor.AddObservation(backLowerLeg_R.localRotation.x);
-            sensor.AddObservation(joints[backLowerLeg_R].rigidbody.angularVelocity.x);
-            sensor.AddObservation(backUpperLeg_R.localRotation.x);
-            sensor.AddObservation(joints[backUpperLeg_R].rigidbody.angularVelocity.x);
-            sensor.AddObservation(backLowerLeg_L.localRotation.x);
-            sensor.AddObservation(joints[backLowerLeg_L].rigidbody.angularVelocity.x);
-            sensor.AddObservation(backUpperLeg_L.localRotation.x);
-            sensor.AddObservation(joints[backUpperLeg_L].rigidbody.angularVelocity.x);
-            // The waist only rotates on the Z axis
-            sensor.AddObservation(frontWaist_L.localRotation.z);
-            sensor.AddObservation(joints[frontWaist_L].rigidbody.angularVelocity.z);
-            sensor.AddObservation(frontWaist_R.localRotation.z);
-            sensor.AddObservation(joints[frontWaist_R].rigidbody.angularVelocity.z);
-            sensor.AddObservation(backWaist_L.localRotation.z);
-            sensor.AddObservation(joints[backWaist_L].rigidbody.angularVelocity.z);
-            sensor.AddObservation(backWaist_R.localRotation.z);
-            sensor.AddObservation(joints[backWaist_R].rigidbody.angularVelocity.z);
-
-
-            // isFootGrounded, linear velocity (size 4, 4*3=12)
-            sensor.AddObservation(frontLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded());
-            sensor.AddObservation(joints[frontLowerLeg_R].rigidbody.velocity);
-            sensor.AddObservation(frontLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded());
-            sensor.AddObservation(joints[frontLowerLeg_L].rigidbody.velocity);
-            sensor.AddObservation(backLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded());
-            sensor.AddObservation(joints[backLowerLeg_R].rigidbody.velocity);
-            sensor.AddObservation(backLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded());
-            sensor.AddObservation(joints[backLowerLeg_L].rigidbody.velocity);
-
-            // isElbowGrounded (size 4)
-            sensor.AddObservation(frontUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded());
-            sensor.AddObservation(frontUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded());
-            sensor.AddObservation(backUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded());
-            sensor.AddObservation(backUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded());
-
-            // For every joint, add the effective strength (size 12)
-            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-            {
-                sensor.AddObservation(joint.Value.effectiveStrength);
-            }
-
-            // This Velocity (3)
-            Vector3 thisVelocity = GetComponent<Rigidbody>().velocity;
-            sensor.AddObservation(thisVelocity);
-
-            // Distance to the target (size 1)
-            sensor.AddObservation(Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true));
-        
-            // Total observation space size: 3 + 1 + 4 + 24 + 4 + 12 + 4 + 3 + 1 = 52
-        
-        }
-
-        public override void OnActionReceived(ActionBuffers actionBuffers)
-        {
-            int i = 0;
-            //           JOINT                      X Axis                   Y Axis                 Z Axis                 Strength  
-            moveJoint(frontLowerLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-            moveJoint(frontLowerLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-            moveJoint(frontUpperLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-            moveJoint(frontUpperLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-            moveJoint(frontWaist_L,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
-            moveJoint(frontWaist_R,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
-            moveJoint(backLowerLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-            moveJoint(backLowerLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-            moveJoint(backUpperLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-            moveJoint(backUpperLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-            moveJoint(backWaist_L,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
-            moveJoint(backWaist_R,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
-
-            // Reward the agent if it is aligning with the ground
-            float groundAlignmentLikeness = checkGroundAlignment();
-            float groundAlignmentLikenessNormalized = (groundAlignmentLikeness + 1.0f) * 0.5f;
-            AddReward(- (1 - groundAlignmentLikenessNormalized));
-            if (- (1 - groundAlignmentLikenessNormalized) > 0){
-                Debug.Log("Something is wrong with the ground alignment reward");
-            }
-            if (groundAlignmentLikeness == -999){
-                Debug.Log("No ground below the agent");
-            }
-
-            // Reward the agent if the velocity of the body is similar to the target velocity
-            
-            // float velocityLikenessNormalized = (velocityLikeness + 1.0f) * 0.5f;
-            float velocityLikeness = checkVelocityMatch();
-            float velocityClamped01 = Mathf.Clamp01(velocityLikeness);
-            AddReward(- (1 - velocityClamped01));
-            if(- (1 - velocityClamped01) > 0){
-                Debug.Log("Something is wrong with the velocity reward");
-            }
-
-            // Punish the agent for sliding
-            addSlidePunishment();
-
-            // Punish the agent if the elbows are touching the ground
-            addElbowStepPunsihment();
-
-            // Reward reduction of distance to the target
-            float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
-            AddReward(Mathf.Clamp(1-(currentDistanceToTarget/prevDistanceToTarget), -1, 1));
-            prevDistanceToTarget = currentDistanceToTarget;
-
-        }
-
-        void FixedUpdate()
-        {
-
-            // Reward the agent if it is touching the target
-            if (touchingTarget()){
-                AddReward(100.0f);
-                EndEpisode();
-            }
-
-            // Punish the agent if it fell 
-            if (agentFell()){
-                AddReward(-100f);
-                EndEpisode();
-            }
-
-            // Punish the agent if it is touching the limits
-            if (touchingLimits()){
-                AddReward(-10.0f);
-            }
-
-            drawToTargetGuideline();
-        }
-
-    #endregion
-
     // Start is called before the first frame update
     
-    // void Start()
-    // {
-    //     setUpJoints();
-    //     getGroundWidthHeight();
-    //     setRandomTargetPosition();
-    //     setRandomAgentPosition();
-    // }
+    void Start()
+    {
+        // Set up the joints: save initial position, rotation & others
+        setUpJoints();
+        // Get the ground width and height of the ground
+        getGroundWidthHeight();
+        // Set random starting position for the target
+        // setRandomTargetPosition();
+        // Set random starting position for the agent
+        // setRandomAgentPosition();
+        // Set the agents distance to the target
+        prevDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
+    }
 
 
     // Update is called once per frame
-    // void Update()
-    // {
-    //     drawToTargetGuideline();
-    //     agentFell();
-    //     // moveJoint();
-    //     if(Input.GetKeyDown(KeyCode.Space)){
-    //         ResetTarget();
-    //         ResetAgent();
-    //     }
-    // }
+    void Update()
+    {
+        drawToTargetGuideline();
+        agentFell(debug: true);
+        moveJoint(joint, x, y, z, strength);
+        if(Input.GetKeyDown(KeyCode.Space)){
+            ResetTarget();
+            ResetAgent();
+        }
+    }
+
 }

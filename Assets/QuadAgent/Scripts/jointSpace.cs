@@ -14,7 +14,7 @@ namespace JointSpace{
         public float highLimitX;
         public float limitY;
         public float limitZ;
-        public float maxStrength = 10000.0f;
+        public float maxStrength = 20000.0f;
         public float effectiveStrength = 0.0f;
         
         /// <summary>

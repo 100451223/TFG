@@ -149,8 +149,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 607023789496506773}
   serializedVersion: 4
-  m_Mass: 2
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -167,7 +167,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &8449400448211683213
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -215,7 +215,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 65
+    limit: 20
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -818,8 +818,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1554195764803155153}
   serializedVersion: 4
-  m_Mass: 20
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -836,7 +836,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!114 &7868747249390062131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -886,10 +886,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 56
+    VectorObservationSize: 68
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 12
+      m_NumContinuousActions: 24
       BranchSizes: 01000000
     VectorActionSize: 
     VectorActionDescriptions: []
@@ -1467,8 +1467,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3431182801771102492}
   serializedVersion: 4
-  m_Mass: 2
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -1485,7 +1485,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &6937800048342834114
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -1533,7 +1533,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 65
+    limit: 20
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -1826,7 +1826,7 @@ Rigidbody:
   m_GameObject: {fileID: 3947588061452947059}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -1843,7 +1843,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &7839602775258625618
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -1880,7 +1880,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 0
+    limit: 45
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -2117,7 +2117,7 @@ Rigidbody:
   m_GameObject: {fileID: 5369239194435845098}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -2134,7 +2134,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &4809146651711966882
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -2171,7 +2171,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 0
+    limit: 45
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -2407,7 +2407,7 @@ Rigidbody:
   m_GameObject: {fileID: 5857595471620747468}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -2424,7 +2424,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &7509882358118758921
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -2461,7 +2461,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 0
+    limit: 45
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -2655,8 +2655,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6046764398242592302}
   serializedVersion: 4
-  m_Mass: 2
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -2673,7 +2673,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!153 &3083076269747250989
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -3094,8 +3094,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7135591769195578371}
   serializedVersion: 4
-  m_Mass: 2
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -3112,7 +3112,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &4730608798887849351
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -3375,8 +3375,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7461269871377137796}
   serializedVersion: 4
-  m_Mass: 2
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -3393,7 +3393,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &7639532127137967178
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -3683,8 +3683,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7910073120119751649}
   serializedVersion: 4
-  m_Mass: 2
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -3701,7 +3701,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &3200225079384610532
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -3749,7 +3749,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 65
+    limit: 20
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -3953,8 +3953,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8108584083098727456}
   serializedVersion: 4
-  m_Mass: 2
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -3971,7 +3971,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &280417316893053301
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -4019,7 +4019,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 65
+    limit: 20
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -4248,7 +4248,7 @@ Rigidbody:
   m_GameObject: {fileID: 8890843168986105979}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -4265,7 +4265,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &4792932527890787262
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -4302,7 +4302,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 0
+    limit: 45
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -4601,8 +4601,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9014573502650032566}
   serializedVersion: 4
-  m_Mass: 2
-  m_Drag: 0
+  m_Mass: 1
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -4619,7 +4619,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!153 &4968618298625897354
 ConfigurableJoint:
   m_ObjectHideFlags: 0
