@@ -29,7 +29,7 @@ public class QuadrupedAgent : Agent
     public Dictionary<Transform, AgentJoint> joints = new Dictionary<Transform, AgentJoint>();
     
     [Header("Speed")]
-    public float speed = 10.0f;
+    public float targetSpeed = 10.0f;
 
     [Header("Target")]
     public Transform target;
@@ -53,7 +53,7 @@ public class QuadrupedAgent : Agent
         public float checkVelocityMatch(){
                 Vector3 thisVelocity = GetComponent<Rigidbody>().velocity;
                 // Y axis might be causing troubles? Or slowing down convergence?
-                Vector3 targetVelocity = transform.forward * speed;
+                Vector3 targetVelocity = transform.forward * targetSpeed;
                 return Utilities.vectorLikeness(thisVelocity, targetVelocity);
         }
 
@@ -148,6 +148,30 @@ public class QuadrupedAgent : Agent
             return localPosition;
         }
 
+        /// <summary>
+        /// Get the average velocity of the joints
+        /// </summary>
+        /// <returns>
+        public Vector3 getAvgJointVelocity(){
+            Vector3 avgVelocity = Vector3.zero;
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                avgVelocity += joint.Value.rigidbody.velocity;
+            }
+            avgVelocity += GetComponent<Rigidbody>().velocity;
+            return avgVelocity/(joints.Count + 1);
+        }
+
+
+        public float GetMatchingVelocityReward(Vector3 velocityGoal, Vector3 actualVelocity)
+        {
+            //distance between our actual velocity and goal velocity
+            var velDeltaMagnitude = Mathf.Clamp(Vector3.Distance(actualVelocity, velocityGoal), 0, targetSpeed);
+
+            //return the value on a declining sigmoid shaped curve that decays from 1 to 0
+            //This reward will approach 1 if it matches perfectly and approach zero as it deviates
+            return Mathf.Pow(1 - Mathf.Pow(velDeltaMagnitude / targetSpeed, 2), 2);
+        }
         
 
     #endregion
@@ -409,9 +433,9 @@ public class QuadrupedAgent : Agent
         /// </summary>
         public void punishFalling(){
             if (agentFell()){
-                AddReward(-10.0f);
+                AddReward(-0.1f);
                 // Debug.Log("Agent fell");
-                EndEpisode();
+                // EndEpisode();
             }
         }
 
@@ -427,27 +451,115 @@ public class QuadrupedAgent : Agent
         }
 
         /// <summary>
-        /// Reward the agent for decreasing the distance to the target. Punish it for increasing the distance to the target
+        /// Reward the agent for decreasing the distance to the ground. Punish it for increasing the distance to the ground
         /// </summary>
-        public void rewardDistanceToTarget(){
+        public void rewardDistanceToTarget_easy(float weight = 1.0f){
             
             float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
 
-            float reward = currentDistanceToTarget < prevDistanceToTarget? 0.1f : -0.1f;
+            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : - 1 * weight;
+            // Debug.Log("Distance to target reward: " + reward);
+            AddReward(reward);
+            prevDistanceToTarget = currentDistanceToTarget;
+        }
+
+        /// <summary>
+        /// Reward the agent for decreasing the minimum distance record to the target. Punish it for increasing the distance to the target
+        /// </summary>
+        public void rewardDistanceToTarget_hard(float weight = 1.0f){
+            
+            float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
+
+            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : - 1 * weight;
             // Debug.Log("Distance to target reward: " + reward);
             AddReward(reward);
             prevDistanceToTarget = currentDistanceToTarget < prevDistanceToTarget? currentDistanceToTarget : prevDistanceToTarget;
         }
 
+        public void rewardTargetAlignment(float weight = 1.0f){
+            Vector3 agentForward = Vector3.Normalize(transform.forward);
+            agentForward.y = 0;
+            Vector3 agentToTarget = Vector3.Normalize(target.transform.position - transform.position);
+            agentToTarget.y = 0;
+            float reward = Utilities.vectorLikeness(agentForward, agentToTarget) * weight;
+            AddReward(reward);
+        }
+
+        public void rewardSmoothMovement(float weight = 1.0f){
+            
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                float effectiveStrength = joint.Value.effectiveStrength;
+                float maxJointStrength = joint.Value.maxStrength;
+                float strengthRatio = effectiveStrength / maxJointStrength;
+                float reward = - strengthRatio * weight;
+
+                AddReward(reward);
+            }
+
+        }
+        
+
+
+        // /// <summary>
+        // /// Punish the agent if it is not aligning with the ground.
+        // /// </summary>
+        // public void punishGroundAlignment(){
+        //     float groundAlignmentLikeness = checkGroundAlignment();
+        //     float groundAlignmentLikenessNormalized = (groundAlignmentLikeness + 1.0f) * 0.5f;
+        //     float punishment = - (1 - groundAlignmentLikenessNormalized);
+        //     AddReward(punishment);
+        //     // Debug.Log("Ground Alignment Likeness Punishment: " + punishment);
+        // }
+
         /// <summary>
-        /// Punish the agent if it is not aligning with the ground.
+        /// Punish the agent for walking with the knees
         /// </summary>
-        public void punishGroundAlignment(){
-            float groundAlignmentLikeness = checkGroundAlignment();
-            float groundAlignmentLikenessNormalized = (groundAlignmentLikeness + 1.0f) * 0.5f;
-            float punishment = - (1 - groundAlignmentLikenessNormalized);
+        /// <param name="weight">
+        /// Weight of the punishment
+        /// </param>
+        public void punishKneeStep(float weight = 1.0f){
+            float frontKneeStepping_R = frontUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()? 1f: 0f;
+            float frontKneeStepping_L = frontUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()? 1f: 0f;
+            float backKneeStepping_R = backUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()? 1f: 0f;
+            float backKneeStepping_L = backUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()? 1f: 0f;
+
+            float punishment = - (frontKneeStepping_R + frontKneeStepping_L + backKneeStepping_R + backKneeStepping_L) * weight;
             AddReward(punishment);
-            // Debug.Log("Ground Alignment Likeness Punishment: " + punishment);
+        }
+
+        /// <summary>
+        /// Reward the agent for walking correctly, punish him for standing still
+        /// </summary>
+        /// <param name="weight">
+        /// Weight of the punishment
+        /// </param>
+        public void rewardPawStep(float weight = 0.1f){
+            float frontPawStepping_R = frontLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
+            float frontPawStepping_L = frontLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
+            float backPawStepping_R = backLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
+            float backPawStepping_L = backLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
+
+            float pawsStepping = (frontPawStepping_R + frontPawStepping_L + backPawStepping_R + backPawStepping_L);
+            if (pawsStepping <= 3){
+                float reward = 1 * weight;
+                AddReward(reward);
+            } else {
+                float punishment = - 1 * weight;
+                AddReward(punishment);
+            }
+        }
+
+        public void punishBumpyMovement(float lowerLimit = -1, float upperLimit = 1){
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                float effectiveStrength = joint.Value.effectiveStrength;
+                float maxJointStrength = joint.Value.maxStrength;
+                float strengthRatio = effectiveStrength / maxJointStrength;
+                float reward = - Mathf.Lerp(lowerLimit, upperLimit, strengthRatio);
+
+                AddReward(reward);
+            }
         }
 
     #endregion
@@ -486,7 +598,8 @@ public class QuadrupedAgent : Agent
             sensor.AddObservation(checkGroundDistance());
 
             // Velocity of the agent (3)
-            sensor.AddObservation(GetComponent<Rigidbody>().velocity);
+            Vector3 avgJointVelocityVal = getAvgJointVelocity();
+            sensor.AddObservation(avgJointVelocityVal);
 
             // Angular velocity of the agent (3)
             sensor.AddObservation(GetComponent<Rigidbody>().angularVelocity);
@@ -502,6 +615,9 @@ public class QuadrupedAgent : Agent
             // Vector forward of the agent (size 3)
             sensor.AddObservation(agentForward); 
 
+            // Vector to the target (size 3)
+            sensor.AddObservation(agentToTarget);
+
             // Distance to the target (size 1)
             sensor.AddObservation(Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true));
 
@@ -516,28 +632,39 @@ public class QuadrupedAgent : Agent
                 sensor.AddObservation(Utilities.isTouching(joint.Value.transform, ground) ? 1 : 0);
             }
         
-            // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 1 + 108 + 12 = 138
+            // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 3 + 1 + 108 + 12 = 141
         }
 
         public override void OnActionReceived(ActionBuffers actionBuffers)
         {
             int i = 0;
             //           JOINT                      X Axis                   Y Axis                 Z Axis                 Strength  
-            moveJoint(frontLowerLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    1000);
-            moveJoint(frontLowerLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    1000);
-            moveJoint(frontUpperLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    1000);
-            moveJoint(frontUpperLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    1000);
-            moveJoint(frontWaist_L,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], 1000);
-            moveJoint(frontWaist_R,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], 1000);
-            moveJoint(backLowerLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    1000);
-            moveJoint(backLowerLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    1000);
-            moveJoint(backUpperLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    1000);
-            moveJoint(backUpperLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    1000);
-            moveJoint(backWaist_L,     0,                                       0,   actionBuffers.ContinuousActions[i++], 1000);
-            moveJoint(backWaist_R,     0,                                       0,   actionBuffers.ContinuousActions[i++], 1000);
+            moveJoint(frontLowerLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontLowerLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontUpperLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontUpperLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontWaist_L,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontWaist_R,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
+            moveJoint(backLowerLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(backLowerLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(backUpperLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(backUpperLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(backWaist_L,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
+            moveJoint(backWaist_R,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
         
-            rewardDistanceToTarget();
-            punishGroundAlignment();
+
+            // rewardDistanceToTarget_easy(weight: 0.1f);
+            rewardDistanceToTarget_hard(weight: 0.1f);
+
+            // rewardTargetAlignment();
+
+            // rewardSmoothMovement(0.1f);
+            
+            // Punish for very strong movements
+            // punishBumpyMovement();
+            punishKneeStep(weight: 1f);
+            rewardPawStep(weight: 0.1f);
+            // punishBumpyMovement();
 
 
         }
@@ -550,8 +677,11 @@ public class QuadrupedAgent : Agent
             punishFalling();
             // Punish the agent if it is touching the limits
             punishTouchingLimits();
+            
             // Punish the agent for walking with the knees
-            // punishKneeStep();
+            // Reward the agent for walking correctly
+            // rewardPawStep();
+
             // Punish the agent for not aligning with the ground
             // Punish the agent for not matching the velocity
             // punishVelocityMatch();

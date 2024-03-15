@@ -301,7 +301,7 @@ ConfigurableJoint:
   m_ConnectedBody: {fileID: 1963364547054416890}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0, z: -0.42}
-  m_Axis: {x: 1, y: -180, z: 0}
+  m_Axis: {x: -1, y: -180, z: 0}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: -0.448, y: 1.427, z: -0.623}
   serializedVersion: 3
@@ -1064,7 +1064,7 @@ Transform:
   m_Children:
   - {fileID: 7850979286777426074}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2168066717886310041
 GameObject:
@@ -1245,10 +1245,10 @@ ConfigurableJoint:
   m_GameObject: {fileID: 2427990090940199333}
   m_ConnectedBody: {fileID: 1963364547054416890}
   m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0.44, y: 0, z: 0}
+  m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 180, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.888, y: 1.427, z: 1.623}
+  m_ConnectedAnchor: {x: 0.568, y: 1.427, z: 1.623}
   serializedVersion: 3
   m_SecondaryAxis: {x: 0, y: -1, z: 0}
   m_XMotion: 0
@@ -1572,7 +1572,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2978645655716654925}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0.448, y: 1.427, z: -1.043}
+  m_LocalPosition: {x: 0.448, y: 1.427, z: -0.986}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2072,7 +2072,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 138
+    VectorObservationSize: 141
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 24
@@ -2117,7 +2117,7 @@ MonoBehaviour:
   backUpperLeg_L: {fileID: 6093705618574781519}
   backWaist_R: {fileID: 2552396430579384999}
   backWaist_L: {fileID: 7823748840688757413}
-  speed: 5
+  targetSpeed: 10
   target: {fileID: 0}
   referenceOrigin: {fileID: 0}
   ground: {fileID: 0}
@@ -2137,8 +2137,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DecisionPeriod: 5
-  TakeActionsBetweenDecisions: 1
+  DecisionPeriod: 4
+  TakeActionsBetweenDecisions: 0
 --- !u!1 &4036906184851943664
 GameObject:
   m_ObjectHideFlags: 0
@@ -3324,7 +3324,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6052584990537602761}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.052, y: -0.606, z: -0.055}
+  m_LocalPosition: {x: -0.045, y: -0.606, z: -0.055}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
