@@ -30,6 +30,7 @@ namespace JointSpace{
             // Get initial setting
             initialPosition = articulation.localPosition;
             initialRotation = articulation.localRotation;
+            prevRotation = articulation.localRotation;
 
             // Get limits
             lowLimitX = joint.lowAngularXLimit.limit;

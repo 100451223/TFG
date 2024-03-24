@@ -315,14 +315,14 @@ public class WalkGait : Agent
         /// The punishment is the negative sum of the number of elbows touching the ground
         /// </summary>
         public void punishKneeStep(){
-            float elbows_stepping = 0.0f;
-            if (frontUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()) elbows_stepping += 1.0f;
-            if (frontUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()) elbows_stepping += 1.0f;
-            if (backUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()) elbows_stepping += 1.0f;
-            if (backUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()) elbows_stepping += 1.0f;
+            float kneesSteppingAmount = 0.0f;
+            if (frontUpperLeg_L.GetComponent<checkKneeGrounded>().kneeIsGrounded()) kneesSteppingAmount += 1.0f;
+            if (frontUpperLeg_R.GetComponent<checkKneeGrounded>().kneeIsGrounded()) kneesSteppingAmount += 1.0f;
+            if (backUpperLeg_L.GetComponent<checkKneeGrounded>().kneeIsGrounded()) kneesSteppingAmount += 1.0f;
+            if (backUpperLeg_R.GetComponent<checkKneeGrounded>().kneeIsGrounded()) kneesSteppingAmount += 1.0f;
             
-            // Debug.Log("Elbows stepping: " + elbows_stepping);
-            AddReward(-elbows_stepping/4);
+            // Debug.Log("Elbows stepping: " + kneesSteppingAmount);
+            AddReward(-kneesSteppingAmount/4);
         }
 
         /// Punish touching the ground

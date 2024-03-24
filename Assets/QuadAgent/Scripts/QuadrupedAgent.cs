@@ -25,6 +25,17 @@ public class QuadrupedAgent : Agent
     public Transform backWaist_R;
     public Transform backWaist_L;
 
+    // Paws
+    public Transform frontPaw_R;
+    public Transform frontPaw_L;
+    public Transform backPaw_R;
+    public Transform backPaw_L;
+    // Knees
+    public Transform frontKnee_R;
+    public Transform frontKnee_L;
+    public Transform backKnee_R;
+    public Transform backKnee_L;
+
     // Dictionary where the key is a string and the value is an AgentJoint
     public Dictionary<Transform, AgentJoint> joints = new Dictionary<Transform, AgentJoint>();
     
@@ -34,6 +45,7 @@ public class QuadrupedAgent : Agent
     [Header("Target")]
     public Transform target;
     public Transform referenceOrigin;
+    public float targetPawHeight = 0.3f;
     
     [Header("Ground")]
     public Transform ground;
@@ -46,107 +58,10 @@ public class QuadrupedAgent : Agent
 
     [Header("ML Agents")]
     private float prevDistanceToTarget;
-    private float maxDistanceToGround;
+    private float maxDistanceToGround = -1.0f;
 
-    #region UTILITIES
+    #region Utilities
 
-        public float checkVelocityMatch(){
-                Vector3 thisVelocity = GetComponent<Rigidbody>().velocity;
-                // Y axis might be causing troubles? Or slowing down convergence?
-                Vector3 targetVelocity = transform.forward * targetSpeed;
-                return Utilities.vectorLikeness(thisVelocity, targetVelocity);
-        }
-
-        /// <summary>
-        /// Likeness of the body's normal and the ground's normal right below the body
-        /// </summary>
-        /// <param name="showGuidelines">
-        /// Show the guidelines for the normals in the scene view if true
-        /// </param>
-        /// <returns>
-        /// Likness if there is ground below the body, -2 otherwise
-        /// </returns>
-        public float checkGroundAlignment(bool debug = true){
-
-            Rigidbody thisRigidbody = GetComponent<Rigidbody>();
-
-            Vector3 agentPosition = thisRigidbody.worldCenterOfMass;
-            float raycastLength = 10.0f;
-            RaycastHit hit;
-
-            // Draw the normal of the ground below the mainBody
-            if (Physics.Raycast(agentPosition, Vector3.down, out hit, raycastLength, groundLayer))
-            {
-                if(debug){
-                    Debug.DrawRay(agentPosition, Vector3.down, Color.green);
-                    Debug.DrawRay(agentPosition, transform.up, Color.blue);
-                    Debug.DrawRay(hit.point, hit.normal, Color.red);
-                }
-
-                float normalsLikeness = Utilities.vectorLikeness(Vector3.Normalize(transform.up), Vector3.Normalize(hit.normal));
-                // Debug.Log("Normals Likeness: " + normalsLikeness);
-        
-                return normalsLikeness;
-            }
-
-            return -999.0f; 
-        }
-
-        /// <summary>
-        /// Check the distance from the main bodie's center of mass to the ground below
-        /// </summary>
-        /// <returns>
-        /// Distance to the ground below the mainBody, -1 if there is no ground below
-        /// </returns>
-        public float checkGroundDistance(){
-
-            Rigidbody thisRigidbody = GetComponent<Rigidbody>();
-            Vector3 agentPosition = thisRigidbody.worldCenterOfMass;
-            float raycastLength = 10.0f;
-            RaycastHit hit;
-
-            // Return the distance to the ground below the mainBody
-            if (Physics.Raycast(agentPosition, Vector3.down, out hit, raycastLength, groundLayer))
-            {
-                return hit.distance;
-            }
-
-            return -1.0f; 
-        }        
-
-        /// <summary>
-        /// Get a random direction in the XZ plane
-        /// </summary>
-        public Vector3 getRandomXZDirection()
-        {
-            Vector3 randomDirection = Random.insideUnitSphere;
-            randomDirection.y = 0;
-            
-            return randomDirection;
-        }
-
-        /// <summary>
-        /// Get a random position in the ground
-        /// </summary>
-        /// <param name="limitOffset">
-        /// Limit offset to avoid getting a position too close to the limits of the world
-        /// </param>
-        /// <returns>
-        /// Random Vector3 in the ground plane
-        /// </returns>
-        public Vector3 getRandomGroundPosition(float limitOffset = 0.2f, float heightOffset = 0.0f){
-
-            // Get random position in the ground plane (XZ)
-            float randomX = Random.Range(-groundWitdh*(1-limitOffset)/2, groundWitdh*(1-limitOffset)/2);
-            float randomZ = Random.Range(-groundHeight*(1-limitOffset)/2, groundHeight*(1-limitOffset)/2);
-            
-            Vector3 worldPosition = new Vector3(randomX, 0.0f, randomZ);
-            // Transform world space position to a position relative to the referenceOrigin
-            Vector3 localPosition = referenceOrigin.TransformPoint(worldPosition);
-            localPosition.y = heightOffset;
-
-            return localPosition;
-        }
 
         /// <summary>
         /// Get the average velocity of the joints
@@ -162,20 +77,25 @@ public class QuadrupedAgent : Agent
             return avgVelocity/(joints.Count + 1);
         }
 
+        // public float checkVelocityMatch(){
+        //         Vector3 thisVelocity = GetComponent<Rigidbody>().velocity;
+        //         // Y axis might be causing troubles? Or slowing down convergence?
+        //         Vector3 targetVelocity = transform.forward * targetSpeed;
+        //         return Utilities.vectorLikeness(thisVelocity, targetVelocity);
+        // }
 
-        public float GetMatchingVelocityReward(Vector3 velocityGoal, Vector3 actualVelocity)
-        {
-            //distance between our actual velocity and goal velocity
-            var velDeltaMagnitude = Mathf.Clamp(Vector3.Distance(actualVelocity, velocityGoal), 0, targetSpeed);
+        // public float GetMatchingVelocityReward(Vector3 velocityGoal, Vector3 actualVelocity)
+        // {
+        //     //distance between our actual velocity and goal velocity
+        //     var velDeltaMagnitude = Mathf.Clamp(Vector3.Distance(actualVelocity, velocityGoal), 0, targetSpeed);
 
-            //return the value on a declining sigmoid shaped curve that decays from 1 to 0
-            //This reward will approach 1 if it matches perfectly and approach zero as it deviates
-            return Mathf.Pow(1 - Mathf.Pow(velDeltaMagnitude / targetSpeed, 2), 2);
-        }
+        //     //return the value on a declining sigmoid shaped curve that decays from 1 to 0
+        //     //This reward will approach 1 if it matches perfectly and approach zero as it deviates
+        //     return Mathf.Pow(1 - Mathf.Pow(velDeltaMagnitude / targetSpeed, 2), 2);
+        // }
         
 
     #endregion
-
 
     #region SETUP - INITIALIZE
 
@@ -214,12 +134,13 @@ public class QuadrupedAgent : Agent
         public void setRandomTargetPosition(){
             Vector3 newPosition;
             do {
-                newPosition = getRandomGroundPosition();
+                newPosition = Utilities.getRandomGroundPosition(groundWitdh, groundHeight, referenceOrigin);
             } while (Utilities.isObjectInPosition(newPosition, 2.0f, groundLayer));
             target.position = newPosition;
             
             // Set random z rotation
-            target.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
+            Vector3 randomYDirection = Utilities.getRandomDirectionXYZ(x: false, y: true, z: false);
+            target.rotation = Quaternion.Euler(randomYDirection);
 
             return;
         }
@@ -230,7 +151,7 @@ public class QuadrupedAgent : Agent
         public void setRandomAgentPosition(){
             Vector3 newPosition;
             do {
-                newPosition = getRandomGroundPosition(limitOffset: 0.3f, heightOffset: 1.0f);
+                newPosition = Utilities.getRandomGroundPosition(groundWitdh, groundHeight, referenceOrigin, limitOffset: 0.3f, heightOffset: 1.0f);
             } while (Utilities.isObjectInPosition(newPosition, 2.0f, groundLayer));
             transform.position = newPosition;
             
@@ -312,6 +233,9 @@ public class QuadrupedAgent : Agent
 
             // Target rotation is expected as a Quaternion
             Quaternion targetRotation = Quaternion.Euler(clampValueX, clampValueY, clampValueZ);
+            
+            // Save the previous rotation value
+            articulation.prevRotation = articulation.joint.targetRotation;
             // Set the target rotation of the articulation
             articulation.joint.targetRotation = targetRotation;
 
@@ -338,6 +262,40 @@ public class QuadrupedAgent : Agent
     #endregion
 
     #region COLLISIONS
+
+        /// <summary>
+        /// Likeness of the body's normal and the ground's normal right below the body
+        /// </summary>
+        /// <param name="showGuidelines">
+        /// Show the guidelines for the normals in the scene view if true
+        /// </param>
+        /// <returns>
+        /// Likness if there is ground below the body, -2 otherwise
+        /// </returns>
+        public float checkGroundAlignment(bool debug = true){
+            Rigidbody thisRigidbody = GetComponent<Rigidbody>();
+
+            Vector3 agentPosition = thisRigidbody.worldCenterOfMass;
+            float raycastLength = 10.0f;
+            RaycastHit hit;
+
+            // Draw the normal of the ground below the mainBody
+            if (Physics.Raycast(agentPosition, Vector3.down, out hit, raycastLength, groundLayer))
+            {
+                if(debug){
+                    Debug.DrawRay(agentPosition, Vector3.down, Color.green);
+                    Debug.DrawRay(agentPosition, transform.up, Color.blue);
+                    Debug.DrawRay(hit.point, hit.normal, Color.red);
+                }
+
+                float normalsLikeness = Utilities.vectorLikeness(Vector3.Normalize(transform.up), Vector3.Normalize(hit.normal));
+                // Debug.Log("Normals Likeness: " + normalsLikeness);
+        
+                return normalsLikeness;
+            }
+
+            return -999.0f; 
+        }   
 
         /// <summary>
         /// Check if the agent has fallen
@@ -403,6 +361,22 @@ public class QuadrupedAgent : Agent
             Debug.DrawRay(new Vector3(transform.position.x, 0.0f, transform.position.z), agentToTarget * 10, Color.red);
         }
 
+        public void drawKneeToGround(){
+            // draw the ray from the knees to the contact point in the ground
+            Debug.DrawRay(frontKnee_R.position, Vector3.down * Utilities.checkDistanceToGround(frontKnee_R.position, groundLayer), Color.green);
+            Debug.DrawRay(frontKnee_L.position, Vector3.down * Utilities.checkDistanceToGround(frontKnee_L.position, groundLayer), Color.green);
+            Debug.DrawRay(backKnee_R.position, Vector3.down * Utilities.checkDistanceToGround(backKnee_R.position, groundLayer), Color.green);
+            Debug.DrawRay(backKnee_L.position, Vector3.down * Utilities.checkDistanceToGround(backKnee_L.position, groundLayer), Color.green);
+        }
+
+        public void drawPawToGround(){
+            // draw the ray from the paws to the contact point in the ground
+            Debug.DrawRay(frontPaw_R.position, Vector3.down * Utilities.checkDistanceToGround(frontPaw_R.position, groundLayer), Color.red);
+            Debug.DrawRay(frontPaw_L.position, Vector3.down * Utilities.checkDistanceToGround(frontPaw_L.position, groundLayer), Color.red);
+            Debug.DrawRay(backPaw_R.position, Vector3.down * Utilities.checkDistanceToGround(backPaw_R.position, groundLayer), Color.red);
+            Debug.DrawRay(backPaw_L.position, Vector3.down * Utilities.checkDistanceToGround(backPaw_L.position, groundLayer), Color.red);
+        }
+
         void OnDrawGizmos(){
             
             foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
@@ -457,7 +431,7 @@ public class QuadrupedAgent : Agent
             
             float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
 
-            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : - 1 * weight;
+            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : -1 * weight;
             // Debug.Log("Distance to target reward: " + reward);
             AddReward(reward);
             prevDistanceToTarget = currentDistanceToTarget;
@@ -470,7 +444,7 @@ public class QuadrupedAgent : Agent
             
             float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
 
-            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : - 1 * weight;
+            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : -1 * weight;
             // Debug.Log("Distance to target reward: " + reward);
             AddReward(reward);
             prevDistanceToTarget = currentDistanceToTarget < prevDistanceToTarget? currentDistanceToTarget : prevDistanceToTarget;
@@ -498,19 +472,33 @@ public class QuadrupedAgent : Agent
             }
 
         }
-        
 
+        public void punishBruteRotations(float weight = 1.0f){
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                Quaternion prevRotation = joint.Value.prevRotation;
+                Quaternion targetRotation = joint.Value.joint.targetRotation;
+                float angle = Utilities.getQuaternionAngle(prevRotation, targetRotation);
+                float normalizedAngle = Utilities.normalizeAngle(angle);
 
-        // /// <summary>
-        // /// Punish the agent if it is not aligning with the ground.
-        // /// </summary>
-        // public void punishGroundAlignment(){
-        //     float groundAlignmentLikeness = checkGroundAlignment();
-        //     float groundAlignmentLikenessNormalized = (groundAlignmentLikeness + 1.0f) * 0.5f;
-        //     float punishment = - (1 - groundAlignmentLikenessNormalized);
-        //     AddReward(punishment);
-        //     // Debug.Log("Ground Alignment Likeness Punishment: " + punishment);
-        // }
+                float punishment = - normalizedAngle * weight;
+                AddReward(punishment);
+            }
+        }
+
+        public void punishBruteRotationsFromInit(float weight = 1.0f){
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                Quaternion prevRotation = joint.Value.initialRotation;
+                Quaternion targetRotation = joint.Value.joint.targetRotation;
+                float angle = Utilities.getQuaternionAngle(prevRotation, targetRotation);
+                float normalizedAngle = Utilities.normalizeAngle(angle);
+
+                float punishment = - normalizedAngle * weight;
+                AddReward(punishment);
+            }
+        }
+    
 
         /// <summary>
         /// Punish the agent for walking with the knees
@@ -519,15 +507,17 @@ public class QuadrupedAgent : Agent
         /// Weight of the punishment
         /// </param>
         public void punishKneeStep(float weight = 1.0f){
-            float frontKneeStepping_R = frontUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()? 1f: 0f;
-            float frontKneeStepping_L = frontUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()? 1f: 0f;
-            float backKneeStepping_R = backUpperLeg_R.GetComponent<checkElbowGrounded>().elbowIsGrounded()? 1f: 0f;
-            float backKneeStepping_L = backUpperLeg_L.GetComponent<checkElbowGrounded>().elbowIsGrounded()? 1f: 0f;
+            float frontKneeStepping_R = frontUpperLeg_R.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
+            float frontKneeStepping_L = frontUpperLeg_L.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
+            float backKneeStepping_R = backUpperLeg_R.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
+            float backKneeStepping_L = backUpperLeg_L.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
 
             float punishment = - (frontKneeStepping_R + frontKneeStepping_L + backKneeStepping_R + backKneeStepping_L) * weight;
             AddReward(punishment);
         }
 
+
+        /// [SOON TO BE DEPRECATED]
         /// <summary>
         /// Reward the agent for walking correctly, punish him for standing still
         /// </summary>
@@ -550,16 +540,131 @@ public class QuadrupedAgent : Agent
             }
         }
 
-        public void punishBumpyMovement(float lowerLimit = -1, float upperLimit = 1){
+        public void punishBumpyMovement(float lowerLimit = -1.0f, float upperLimit = 1.0f, float weight = 1.0f){
             foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
             {
                 float effectiveStrength = joint.Value.effectiveStrength;
                 float maxJointStrength = joint.Value.maxStrength;
                 float strengthRatio = effectiveStrength / maxJointStrength;
-                float reward = - Mathf.Lerp(lowerLimit, upperLimit, strengthRatio);
+                float reward = - Mathf.Lerp(lowerLimit, upperLimit, strengthRatio) * weight;
 
                 AddReward(reward);
             }
+        }        
+
+        // public void punishPawKneeRelativeDistance(float kneeDistancePerc = 0.75f, float weight = 1.0f){
+        //     // Front right
+        //     float frontPawToGround_R = Utilities.checkDistanceToGround(frontPaw_R.position, groundLayer);
+        //     float frontKneeToGround_R = Utilities.checkDistanceToGround(frontKnee_R.position, groundLayer);
+        //     float punishmentFrontPawKnee_R = - frontPawToGround_R/frontKneeToGround_R;
+
+        //     // Front left
+        //     float frontPawToGround_L = Utilities.checkDistanceToGround(frontPaw_L.position, groundLayer);
+        //     float frontKneeToGround_L = Utilities.checkDistanceToGround(frontKnee_L.position, groundLayer);
+        //     float punishmentFrontPawKnee_L = - frontPawToGround_L/frontKneeToGround_L;
+
+        //     // Back right
+        //     float backPawToGround_R = Utilities.checkDistanceToGround(backPaw_R.position, groundLayer);
+        //     float backKneeToGround_R = Utilities.checkDistanceToGround(backKnee_R.position, groundLayer);
+        //     float punishmentBackPawKnee_R = - backPawToGround_R/backKneeToGround_R;
+
+        //     // Back left
+        //     float backPawToGround_L = Utilities.checkDistanceToGround(backPaw_L.position, groundLayer);
+        //     float backKneeToGround_L = Utilities.checkDistanceToGround(backKnee_L.position, groundLayer);
+        //     float punishmentBackPawKnee_L = - backPawToGround_L/backKneeToGround_L;
+
+        //     float punishment = (punishmentFrontPawKnee_R + punishmentFrontPawKnee_L + punishmentBackPawKnee_R + punishmentBackPawKnee_L) * weight;
+        //     AddReward(punishment);
+        // }
+
+        private float calcPawHeightReward(Transform paw){
+            float pawToGround = Utilities.checkDistanceToGround(paw.position, groundLayer);
+            float rewardPawHeight = pawToGround/targetPawHeight;
+            if (rewardPawHeight > 1.0f){
+                return (1-rewardPawHeight);
+            }
+            return rewardPawHeight;
+        }
+
+        public void rewardWalkGait(float tooManyContactsWeight = 1.0f, float crossedContactsWeight = 1.0f, float targetPawHeightWeight = 1.0f){
+            
+            // Check which legs are touching the gorund 
+            bool frontLegRTouchingGround = Utilities.isTouching(frontLowerLeg_R, ground);
+            bool frontLegLTouchingGround = Utilities.isTouching(frontLowerLeg_L, ground);
+            bool backLegRTouchingGround = Utilities.isTouching(backLowerLeg_R, ground);
+            bool backLegLTouchingGround = Utilities.isTouching(backLowerLeg_L, ground);
+
+            // Punish more than 3 or less than 2 legs touching the ground
+            float touchingGroundAmount = (frontLegRTouchingGround ? 1 : 0) + (frontLegLTouchingGround ? 1 : 0) + (backLegRTouchingGround ? 1 : 0) + (backLegLTouchingGround ? 1 : 0);
+            if (touchingGroundAmount > 3 || touchingGroundAmount < 2){
+                AddReward(-1.0f * tooManyContactsWeight);
+            }
+
+            // Reward the agent for walking with the correct gait
+            if (touchingGroundAmount == 2)
+            {
+                if(frontLegRTouchingGround && backLegLTouchingGround){
+                    AddReward(1.0f * crossedContactsWeight);
+                } else if (frontLegLTouchingGround && backLegRTouchingGround){
+                    AddReward(1.0f  * crossedContactsWeight);
+                }
+            }
+
+            // Reward the agent for rising the legs up to the target height
+            if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
+            if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
+            if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
+            if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
+
+
+        }
+
+        public void punishTouchingGround(float weight = 1.0f){
+            float reward = 0.0f;
+            // Upper leg R
+            bool touchingGround_frontUpperLeg_R = Utilities.isTouching(frontUpperLeg_R, ground);
+            reward += touchingGround_frontUpperLeg_R ? - 1 : 0;
+            // Upper leg L
+            bool touchingGround_frontUpperLeg_L = Utilities.isTouching(frontUpperLeg_L, ground);
+            reward += touchingGround_frontUpperLeg_L ? - 1 : 0;
+            // Waist R
+            bool touchingGround_frontWaist_R = Utilities.isTouching(frontWaist_R, ground);
+            reward += touchingGround_frontWaist_R ? - 1 : 0;
+            // Waist L
+            bool touchingGround_frontWaist_L = Utilities.isTouching(frontWaist_L, ground);
+            reward += touchingGround_frontWaist_L ? - 1 : 0;
+            // Upper leg R
+            bool touchingGround_backUpperLeg_R = Utilities.isTouching(backUpperLeg_R, ground);
+            reward += touchingGround_backUpperLeg_R ? - 1 : 0;
+            // Upper leg L
+            bool touchingGround_backUpperLeg_L = Utilities.isTouching(backUpperLeg_L, ground);
+            reward += touchingGround_backUpperLeg_L ? - 1 : 0;
+            // Back Waist R
+            bool touchingGround_backWaist_R = Utilities.isTouching(backWaist_R, ground);
+            reward += touchingGround_backWaist_R ? - 1 : 0;
+            // Waist L
+            bool touchingGround_backWaist_L = Utilities.isTouching(backWaist_L, ground);
+            reward += touchingGround_backWaist_L ? - 1 : 0;
+            // this 
+            // float touchingGround_this = Utilities.isTouching(transform, ground);
+            // reward += touchingGround_this ? - 1 : 0;
+
+            AddReward(reward * weight);
+        }
+
+        public void rewardDistanceToGround(float weight = 1.0f){
+            float distanceToGround = Utilities.checkDistanceToGround(transform.position, groundLayer);
+            // Debug.Log("currentDTG/maxDTG: " + distanceToGround/maxDistanceToGround);
+            float distanceToGroundRatio = distanceToGround/maxDistanceToGround;
+            
+            if (distanceToGroundRatio > 1.0f)
+            {
+                float punishment = (1-distanceToGroundRatio) * weight;
+                AddReward(punishment);
+            }
+
+            float reward = distanceToGroundRatio * weight;
+            AddReward(reward);
         }
 
     #endregion
@@ -586,7 +691,10 @@ public class QuadrupedAgent : Agent
             // Calculate the initial distance to the target
             prevDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
             // Calculate the initial distance to the ground
-            maxDistanceToGround = checkGroundDistance();
+            if(maxDistanceToGround < 0){
+                Vector3 agentPosition = GetComponent<Rigidbody>().worldCenterOfMass;
+                maxDistanceToGround = Utilities.checkDistanceToGround(agentPosition, groundLayer);
+            }
         }
 
         public override void CollectObservations(VectorSensor sensor)
@@ -595,7 +703,8 @@ public class QuadrupedAgent : Agent
             sensor.AddObservation(target.position);
 
             // Distance to the ground (size 1)
-            sensor.AddObservation(checkGroundDistance());
+            Vector3 agentPosition = GetComponent<Rigidbody>().worldCenterOfMass;
+            sensor.AddObservation(Utilities.checkDistanceToGround(agentPosition, groundLayer));
 
             // Velocity of the agent (3)
             Vector3 avgJointVelocityVal = getAvgJointVelocity();
@@ -628,11 +737,19 @@ public class QuadrupedAgent : Agent
                 sensor.AddObservation(joint.Value.rigidbody.velocity);
                 sensor.AddObservation(joint.Value.rigidbody.angularVelocity);
 
+                // Angular difference between the rotation taken in the last step and the one before that (size 1 * 12 = 12)
+                float angle = Utilities.getQuaternionAngle(joint.Value.initialRotation, joint.Value.joint.targetRotation);
+                float normalizedAngle = Utilities.normalizeAngle(angle);
+                sensor.AddObservation(normalizedAngle);
+
+                // Effective strength in the last step (size 1 * 12 = 12)
+                sensor.AddObservation(joint.Value.effectiveStrength);
+
                 // Is the joint touching the ground (1 * 12 = 12)
                 sensor.AddObservation(Utilities.isTouching(joint.Value.transform, ground) ? 1 : 0);
             }
         
-            // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 3 + 1 + 108 + 12 = 141
+            // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 3 + 1 + 108 + 12 +12 + 12= 165
         }
 
         public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -653,18 +770,35 @@ public class QuadrupedAgent : Agent
             moveJoint(backWaist_R,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
         
 
-            // rewardDistanceToTarget_easy(weight: 0.1f);
-            rewardDistanceToTarget_hard(weight: 0.1f);
+            // PHASE 1
+            // rewardDistanceToTarget_easy(weight: 0.5f);
+            // PHASE 2
+            // TIP: change weight to 1.0f in PHASE 5?
+            rewardDistanceToTarget_hard(weight: 0.5f);
+            rewardTargetAlignment(weight: 0.5f);
 
-            // rewardTargetAlignment();
-
-            // rewardSmoothMovement(0.1f);
-            
-            // Punish for very strong movements
-            // punishBumpyMovement();
+            // PHASE 3
+            // New Quad Agent V11
             punishKneeStep(weight: 1f);
-            rewardPawStep(weight: 0.1f);
-            // punishBumpyMovement();
+            punishTouchingGround(weight: 1f);
+            rewardDistanceToGround(weight: 0.5f);
+            punishBruteRotationsFromInit(weight: 0.5f);
+            punishBumpyMovement(weight: 0.5f);
+
+            // PHASE 4
+            // rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.5f, targetPawHeightWeight: 0.2f);
+
+            
+            // Learn quadruped walking gait
+            // PHASE 4
+
+            // New Quad Agent V6
+            // punishTouchingGround(weight: 0.1f);
+            // punishBruteRotations(weight: 0.25f);
+            // punishBumpyMovement(weight: 0.25f);
+
+            // PHASE 5
+            // punishPawKneeRelativeDistance(weight: 0.1f);
 
 
         }
@@ -677,28 +811,15 @@ public class QuadrupedAgent : Agent
             punishFalling();
             // Punish the agent if it is touching the limits
             punishTouchingLimits();
-            
-            // Punish the agent for walking with the knees
-            // Reward the agent for walking correctly
-            // rewardPawStep();
-
-            // Punish the agent for not aligning with the ground
-            // Punish the agent for not matching the velocity
-            // punishVelocityMatch();
-            // Reward/punish the agent for decreasing/increasing the distance to the target
-            // Reward/punish the agent for decreasing/increasing the distance to the ground
-            // rewardDistanceToGround();
-            // Reward the agent for walking correctly
-            // rewardWalkingCycle();
-            // Punish the agent for touching the ground
-            // punishTouchingGround();
 
             drawToTargetGuideline();
+            drawKneeToGround();
+            drawPawToGround();
         }
 
     #endregion
 
-    // Start is called before the first frame update
+    // // Start is called before the first frame update
     
     // void Start()
     // {
@@ -709,11 +830,13 @@ public class QuadrupedAgent : Agent
     // }
 
 
-    // Update is called once per frame
+    // // Update is called once per frame
     // void Update()
     // {
     //     drawToTargetGuideline();
     //     agentFell();
+    //     drawKneeToGround();
+    //     drawPawToGround();
     //     // moveJoint();
     //     if(Input.GetKeyDown(KeyCode.Space)){
     //         ResetTarget();

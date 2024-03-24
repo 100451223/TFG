@@ -112,5 +112,89 @@ namespace UtilitiesSpace{
             return false;
         }
 
+        /// <summary>
+        /// Check the distance from a given position to the ground below
+        /// </summary>
+        /// <returns>
+        /// Distance to the ground in a straight line, -1 if there is no ground below
+        /// </returns>
+        public static float checkDistanceToGround(Vector3 originPosition, LayerMask groundLayerMask, int raycastLength = 10){
+
+            RaycastHit hit;
+
+            // Return the distance to the ground below the mainBody
+            if (Physics.Raycast(originPosition, Vector3.down, out hit, raycastLength, groundLayerMask))
+            {
+                return hit.distance;
+            }
+
+            return -1.0f; 
+        }
+
+
+        /// <summary>
+        /// Get a random direction in the XZ plane
+        /// </summary>
+        public static Vector3 getRandomDirectionXYZ(bool x = true, bool y = true, bool z = true)
+        {
+            Vector3 randomDirection = Random.insideUnitSphere;
+            
+            if (!x) randomDirection.x = 0;
+            if (!y) randomDirection.y = 0;
+            if (!z) randomDirection.z = 0;
+            
+            return randomDirection;
+        }
+
+        /// <summary>
+        /// Get a random position in the ground
+        /// </summary>
+        /// <param name="limitOffset">
+        /// Limit offset to avoid getting a position too close to the limits of the world
+        /// </param>
+        /// <returns>
+        /// Random Vector3 in the ground plane
+        /// </returns>
+        public static Vector3 getRandomGroundPosition(float groundWidthValue, float groundHeightValue, Transform worldOriginReference, float limitOffset = 0.2f, float heightOffset = 0.0f){
+
+            // Get random position in the ground plane (XZ)
+            float randomX = Random.Range(-groundWidthValue*(1-limitOffset)/2, groundWidthValue*(1-limitOffset)/2);
+            float randomZ = Random.Range(-groundHeightValue*(1-limitOffset)/2, groundHeightValue*(1-limitOffset)/2);
+            
+            Vector3 worldPosition = new Vector3(randomX, 0.0f, randomZ);
+            // Transform world space position to a position relative to the referenceOrigin
+            Vector3 localPosition = worldOriginReference.TransformPoint(worldPosition);
+            localPosition.y = heightOffset;
+
+            return localPosition;
+        }
+
+
+        /// <summary>
+        /// Compute the angle between two quaternions
+        /// </summary>
+        /// <param name="q1">
+        /// First quaternion
+        /// </param>
+        /// <param name="q2">
+        /// Second quaternion
+        /// </param>
+        /// <returns></returns>
+        public static float getQuaternionAngle(Quaternion q1, Quaternion q2){
+            float angle = Quaternion.Angle(q1, q2);
+            return angle;
+        }
+
+        /// <summary>
+        /// Normalize an angle to be between 0 and 1
+        /// </summary>
+        /// <param name="angle">
+        /// Angle to normalize
+        /// </param>
+        /// <returns></returns>
+        public static float normalizeAngle(float angle){
+            return angle / 180.0f;
+        }
+
     }
 }

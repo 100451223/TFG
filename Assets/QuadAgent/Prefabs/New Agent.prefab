@@ -857,7 +857,7 @@ GameObject:
   - component: {fileID: 3947755418959151370}
   - component: {fileID: 955300159538579659}
   m_Layer: 0
-  m_Name: elbowGroundCheckSphere
+  m_Name: backKnee_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1367,7 +1367,7 @@ GameObject:
   - component: {fileID: 793627870339077096}
   - component: {fileID: 7729536565887615270}
   m_Layer: 0
-  m_Name: pawGroundCheckSphere
+  m_Name: frontPaw_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1760,7 +1760,7 @@ GameObject:
   - component: {fileID: 5090146714955087332}
   - component: {fileID: 1165252910756653973}
   m_Layer: 0
-  m_Name: pawGroundCheckSphere
+  m_Name: backPaw_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2072,7 +2072,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 141
+    VectorObservationSize: 165
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 24
@@ -2117,9 +2117,18 @@ MonoBehaviour:
   backUpperLeg_L: {fileID: 6093705618574781519}
   backWaist_R: {fileID: 2552396430579384999}
   backWaist_L: {fileID: 7823748840688757413}
+  frontPaw_R: {fileID: 8573058792206311764}
+  frontPaw_L: {fileID: 7909806995597185864}
+  backPaw_R: {fileID: 3568512076025513969}
+  backPaw_L: {fileID: 1444388999658785184}
+  frontKnee_R: {fileID: 8578324487715743792}
+  frontKnee_L: {fileID: 6929174581400339844}
+  backKnee_R: {fileID: 4224766956241457281}
+  backKnee_L: {fileID: 4588355719297745241}
   targetSpeed: 10
   target: {fileID: 0}
   referenceOrigin: {fileID: 0}
+  targetPawHeight: 0.3
   ground: {fileID: 0}
   groundLayer:
     serializedVersion: 2
@@ -2137,7 +2146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DecisionPeriod: 4
+  DecisionPeriod: 5
   TakeActionsBetweenDecisions: 0
 --- !u!1 &4036906184851943664
 GameObject:
@@ -3310,7 +3319,7 @@ GameObject:
   - component: {fileID: 2154322534907516115}
   - component: {fileID: 2797318280619163606}
   m_Layer: 0
-  m_Name: elbowGroundCheckSphere
+  m_Name: frontKnee_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3621,7 +3630,7 @@ GameObject:
   - component: {fileID: 5027774556154685634}
   - component: {fileID: 6937323806710086031}
   m_Layer: 0
-  m_Name: elbowGroundCheckSphere
+  m_Name: backKnee_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4016,7 +4025,7 @@ GameObject:
   - component: {fileID: 2943462518847335250}
   - component: {fileID: 6336592701498460970}
   m_Layer: 0
-  m_Name: elbowGroundCheckSphere
+  m_Name: frontKnee_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4472,7 +4481,7 @@ GameObject:
   - component: {fileID: 408437732646719859}
   - component: {fileID: 4559233087208893941}
   m_Layer: 0
-  m_Name: pawGroundCheckSphere
+  m_Name: backPaw_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4783,7 +4792,7 @@ GameObject:
   - component: {fileID: 6241304774928880479}
   - component: {fileID: 5587922415013754050}
   m_Layer: 0
-  m_Name: pawGroundCheckSphere
+  m_Name: frontPaw_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
