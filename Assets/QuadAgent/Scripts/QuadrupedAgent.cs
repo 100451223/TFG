@@ -459,6 +459,23 @@ public class QuadrupedAgent : Agent
             AddReward(reward);
         }
 
+        public void rewardGroundAlignment(float weight = 1.0f){
+            float likeness = checkGroundAlignment();
+            
+            // Doesn't affect if there is no ground below????
+            if (likeness < -1f){
+                Debug.Log("No ground below!");
+                return;
+            }
+
+            if (likeness < 0){
+                AddReward(-1 * weight);
+            } else {
+                float punishment = - (1 - likeness) * weight;
+                AddReward(punishment * weight);
+            }
+        }
+
         public void rewardSmoothMovement(float weight = 1.0f){
             
             foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
@@ -601,20 +618,20 @@ public class QuadrupedAgent : Agent
             }
 
             // Reward the agent for walking with the correct gait
-            if (touchingGroundAmount == 2)
-            {
-                if(frontLegRTouchingGround && backLegLTouchingGround){
-                    AddReward(1.0f * crossedContactsWeight);
-                } else if (frontLegLTouchingGround && backLegRTouchingGround){
-                    AddReward(1.0f  * crossedContactsWeight);
-                }
-            }
+            // if (touchingGroundAmount == 2)
+            // {
+            //     if(frontLegRTouchingGround && backLegLTouchingGround){
+            //         AddReward(1.0f * crossedContactsWeight);
+            //     } else if (frontLegLTouchingGround && backLegRTouchingGround){
+            //         AddReward(1.0f  * crossedContactsWeight);
+            //     }
+            // }
 
             // Reward the agent for rising the legs up to the target height
-            if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
-            if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
-            if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
-            if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
+            // if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
+            // if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
+            // if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
+            // if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
 
 
         }
@@ -665,6 +682,41 @@ public class QuadrupedAgent : Agent
 
             float reward = distanceToGroundRatio * weight;
             AddReward(reward);
+        }
+
+        public float mean(float[] values){
+            float sum = 0.0f;
+            foreach (float value in values){
+                sum += value;
+            }
+            return sum/values.Length;
+        }
+
+        // Std
+        public float std(float[] values){
+            
+            float meanValue = mean(values);
+
+            float sumOfSquares = 0.0f;
+            foreach (float value in values)
+            {
+                sumOfSquares += Mathf.Pow(value - meanValue, 2);
+            }
+
+            return Mathf.Sqrt(sumOfSquares/values.Length);
+        }
+
+        public void punishUnevenWaistHeights(float weight = 1.0f){
+            float[] waistHeights = new float[4];
+            waistHeights[0] = frontWaist_R.position.y;
+            waistHeights[1] = frontWaist_L.position.y;
+            waistHeights[2] = backWaist_R.position.y;
+            waistHeights[3] = backWaist_L.position.y;
+
+            float stdWaistHeights = std(waistHeights);
+            float punishment = stdWaistHeights * weight;
+            // Debug.Log("Punishment: " + punishment);
+            AddReward(-punishment);
         }
 
     #endregion
@@ -779,14 +831,18 @@ public class QuadrupedAgent : Agent
 
             // PHASE 3
             // New Quad Agent V11
-            punishKneeStep(weight: 1f);
-            punishTouchingGround(weight: 1f);
-            rewardDistanceToGround(weight: 0.5f);
-            punishBruteRotationsFromInit(weight: 0.5f);
-            punishBumpyMovement(weight: 0.5f);
+            punishKneeStep(weight: 1f); // max -4
+            rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.25f, targetPawHeightWeight: 0.2f);
+            rewardGroundAlignment(weight: 1f);
+            punishUnevenWaistHeights(weight: 0.25f);
+            // punishTouchingGround(weight: 0.5f); // max -8
+            // punishBruteRotationsFromInit(weight: 1f);
+            // punishBumpyMovement(weight: 0.2f);
 
             // PHASE 4
-            // rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.5f, targetPawHeightWeight: 0.2f);
+
+            // PHASE 5
+            // rewardDistanceToGround(weight: 1f);
 
             
             // Learn quadruped walking gait
