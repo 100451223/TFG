@@ -563,9 +563,10 @@ public class QuadrupedAgent : Agent
                 float effectiveStrength = joint.Value.effectiveStrength;
                 float maxJointStrength = joint.Value.maxStrength;
                 float strengthRatio = effectiveStrength / maxJointStrength;
-                float reward = - Mathf.Lerp(lowerLimit, upperLimit, strengthRatio) * weight;
+                // float reward = - Mathf.Lerp(lowerLimit, upperLimit, strengthRatio) * weight;
+                float punishment = - strengthRatio * weight;
 
-                AddReward(reward);
+                AddReward(punishment);
             }
         }        
 
@@ -822,27 +823,29 @@ public class QuadrupedAgent : Agent
             moveJoint(backWaist_R,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
         
 
-            // PHASE 1
-            // rewardDistanceToTarget_easy(weight: 0.5f);
-            // PHASE 2
-            // TIP: change weight to 1.0f in PHASE 5?
-            rewardDistanceToTarget_hard(weight: 0.5f);
-            rewardTargetAlignment(weight: 0.5f);
+            // STAGE 1
+                
+                // PHASE 1
+                    // rewardDistanceToTarget_easy(weight: 0.5f);
+                // PHASE 2
+                    rewardDistanceToTarget_hard(weight: 0.5f);
+                    rewardTargetAlignment(weight: 0.5f);
 
-            // PHASE 3
-            // New Quad Agent V11
+            // STAGE 2
             punishKneeStep(weight: 1f); // max -4
             rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.25f, targetPawHeightWeight: 0.2f);
             rewardGroundAlignment(weight: 1f);
             punishUnevenWaistHeights(weight: 0.25f);
+            rewardDistanceToGround(weight: 0.1f);
+
+            // STAGE 3
             // punishTouchingGround(weight: 0.5f); // max -8
-            // punishBruteRotationsFromInit(weight: 1f);
-            // punishBumpyMovement(weight: 0.2f);
+            // punishBruteRotationsFromInit(weight: 0.2f); // max -12
+            // punishBumpyMovement(weight: 0.2f); // max -12
 
             // PHASE 4
 
             // PHASE 5
-            // rewardDistanceToGround(weight: 1f);
 
             
             // Learn quadruped walking gait
