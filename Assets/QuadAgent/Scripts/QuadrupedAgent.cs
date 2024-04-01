@@ -120,15 +120,6 @@ public class QuadrupedAgent : Agent
         }
 
         /// <summary>
-        /// Get the width and height of the ground
-        /// </summary>
-        public void getGroundWidthHeight(){
-            groundWitdh = ground.GetComponent<MeshRenderer>().bounds.size.x;
-            groundHeight = ground.GetComponent<MeshRenderer>().bounds.size.z;
-            return;
-        }
-
-        /// <summary>
         /// Set a random position for the target
         /// </summary>
         public void setRandomTargetPosition(){
@@ -728,7 +719,7 @@ public class QuadrupedAgent : Agent
             // Set up the joints: save initial position, rotation & others
             setUpJoints();
             // Get the ground width and height of the ground
-            getGroundWidthHeight();
+            (groundWitdh, groundHeight) = Utilities.getWidthHeight(ground);
             // Set random starting position for the target
             setRandomTargetPosition();
             // Set random starting position for the agent

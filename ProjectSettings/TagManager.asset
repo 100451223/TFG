@@ -7,6 +7,7 @@ TagManager:
   - agent
   - ground
   - target
+  - obstacle
   layers:
   - Default
   - TransparentFX
@@ -14,7 +15,7 @@ TagManager:
   - ground
   - Water
   - UI
-  - 
+  - limit
   - 
   - 
   - 

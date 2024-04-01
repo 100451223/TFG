@@ -112,6 +112,7 @@ namespace UtilitiesSpace{
             return false;
         }
 
+
         /// <summary>
         /// Check the distance from a given position to the ground below
         /// </summary>
@@ -194,6 +195,15 @@ namespace UtilitiesSpace{
         /// <returns></returns>
         public static float normalizeAngle(float angle){
             return angle / 180.0f;
+        }
+
+        /// <summary>
+        /// Get the width and height of the ground
+        /// </summary>
+        public static (float, float) getWidthHeight(Transform obj){
+            float width = obj.GetComponent<MeshRenderer>().bounds.size.x;
+            float height = obj.GetComponent<MeshRenderer>().bounds.size.z;
+            return (width, height);
         }
 
     }
