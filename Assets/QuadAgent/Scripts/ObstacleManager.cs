@@ -5,27 +5,25 @@ using UtilitiesSpace;
 public class ObstacleManager : MonoBehaviour
 {
     public GameObject obstaclePrefab;
+    public Transform obstacleSpawnArea;
     public Transform referenceOrigin;
     public LayerMask groundLayer;
     public LayerMask limitsLayer;
     public Transform ground;
+    public Vector3 rotationOffset = new Vector3(0, 0, 0);
 
     // Start is called before the first frame update
-    public void placeObstacles(int numObstacles)
+    public void placeObstacles(int numObstacles, Transform parent)
     {
-        // Get dimensions of the ground
-        float groundWidth;
-        float groundHeight;
-        (groundWidth, groundHeight) = Utilities.getWidthHeight(ground);
-        
+        // Get dimensions of the ground        
         int trials = 0;
-        Debug.Log("Placing obstacles");
         for (int i = 0; i < numObstacles; i++)
         {
             bool foundSpot = true;
             Vector3 position;
             do {
-                position = Utilities.getRandomGroundPosition(groundWidth, groundHeight, referenceOrigin);
+                // position = Utilities.getRandomGroundPosition(groundWidth, groundHeight, referenceOrigin);
+                position = Utilities.getRandomPlanePosition(obstacleSpawnArea, referenceOrigin);
                 if (trials > 1000)
                 {
                     Debug.Log("Too many trials while placing obstacles");
@@ -33,21 +31,27 @@ public class ObstacleManager : MonoBehaviour
                     break;
                 }
                 trials++;
-            } while (Utilities.isObjectInPosition(position, 3.0f, groundLayer));
+            } while (Utilities.isObjectInPosition(position, 2.0f, groundLayer));
             
+
             if (foundSpot)
-                Instantiate(obstaclePrefab, position, Quaternion.Euler(90, 0, 0));
+            {
+                GameObject newObstacle = Instantiate(obstaclePrefab, position, Quaternion.Euler(rotationOffset.x, rotationOffset.y, rotationOffset.z));
+                newObstacle.transform.parent = parent;
+                newObstacle.name = "Obstacle" + i;
+            }
 
         }
-        Debug.Log("Obstacles placed");
     }
 
-    public void clearObstacles()
+    public void clearObstacles(Transform parent)
     {
-        GameObject[] obstacles = GameObject.FindGameObjectsWithTag("obstacle");
-        foreach (GameObject obstacle in obstacles)
+        foreach (Transform child in parent)
         {
-            Destroy(obstacle);
+            if (child.gameObject.CompareTag("obstacle"))
+            {
+                Destroy(child.gameObject);
+            }
         }
     }
 

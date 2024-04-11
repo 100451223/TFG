@@ -84,6 +84,20 @@ namespace UtilitiesSpace{
             return false;
         }
 
+        public static bool isTouchingByTag(Transform gameObj1, string tag, bool debug = false){
+            GameObject[] gameObj2s = GameObject.FindGameObjectsWithTag(tag);
+            foreach (GameObject gameObj2 in gameObj2s)
+            {
+                if (isTouching(gameObj1, gameObj2.transform))
+                {
+                    if (debug)
+                        Debug.Log("Touching " + tag);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Check if there is an object in the target position
         /// </summary>
@@ -101,7 +115,7 @@ namespace UtilitiesSpace{
         /// </returns>
         public static bool isObjectInPosition(Vector3 targetPosition, float checkRadius, LayerMask groundLayer, bool debug = false){
 
-            int layerMask = ~groundLayer;
+            int layerMask = ~(groundLayer | LayerMask.GetMask("SpawnArea"));
 
             if (Physics.CheckSphere(targetPosition, checkRadius, layerMask))
             {
@@ -170,6 +184,56 @@ namespace UtilitiesSpace{
             return localPosition;
         }
 
+        /// <summary>
+        /// Get the width and height of the ground
+        /// </summary>
+        public static (float, float) getWidthHeight(Transform obj){
+            float width = obj.GetComponent<MeshRenderer>().bounds.size.x;
+            float height = obj.GetComponent<MeshRenderer>().bounds.size.z;
+            return (width, height);
+        }
+
+        /// <summary>
+        /// Get a random position in the given plane
+        /// </summary>
+        /// <param name="plane">
+        /// Plane to get the random position on
+        /// </param>
+        /// <param name="worldOriginReference">
+        /// Reference to transform the world position to a local position
+        /// </param>
+        /// <param name="limitOffset">
+        /// Limit offset to avoid getting a position too close to the limits of the world
+        /// </param>
+        /// <param name="heightOffset">
+        /// Height offset to get the position at a certain height
+        /// </param>
+        /// <returns>
+        /// Random Vector3 in the given plane relative to the worldOriginReference
+        /// </returns>
+        public static Vector3 getRandomPlanePosition(Transform plane, Transform worldOriginReference, float limitOffset = 0.0f, float heightOffset = 0.0f){
+
+            float planeZOffset = plane.transform.position.z;
+
+            // Get the width and height of the plane
+            float planeWidth;
+            float planeHeight;
+            (planeWidth, planeHeight) = getWidthHeight(plane);
+            // Get random position in the ground plane (XZ)
+            float randomX = Random.Range(-planeWidth*(1-limitOffset)/2, planeWidth*(1-limitOffset)/2);
+            float randomZ = Random.Range(-planeHeight*(1-limitOffset)/2, planeHeight*(1-limitOffset)/2);
+            
+            Vector3 worldPosition = new Vector3(randomX, 0.0f, randomZ - planeZOffset);
+            // Transform world space position to a position relative to the referenceOrigin
+            Vector3 localPosition = worldOriginReference.TransformPoint(worldPosition);
+            localPosition.y = heightOffset;
+
+            // Draw a sphere in the position
+            
+
+            return localPosition;
+        }
+
 
         /// <summary>
         /// Compute the angle between two quaternions
@@ -197,13 +261,26 @@ namespace UtilitiesSpace{
             return angle / 180.0f;
         }
 
-        /// <summary>
-        /// Get the width and height of the ground
-        /// </summary>
-        public static (float, float) getWidthHeight(Transform obj){
-            float width = obj.GetComponent<MeshRenderer>().bounds.size.x;
-            float height = obj.GetComponent<MeshRenderer>().bounds.size.z;
-            return (width, height);
+        public static float mean(float[] values){
+            float sum = 0.0f;
+            foreach (float value in values){
+                sum += value;
+            }
+            return sum/values.Length;
+        }
+
+        // Std
+        public static float std(float[] values){
+            
+            float meanValue = mean(values);
+
+            float sumOfSquares = 0.0f;
+            foreach (float value in values)
+            {
+                sumOfSquares += Mathf.Pow(value - meanValue, 2);
+            }
+
+            return Mathf.Sqrt(sumOfSquares/values.Length);
         }
 
     }

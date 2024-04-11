@@ -8,7 +8,29 @@ using JointSpace;
 using UtilitiesSpace;
 using UnityEngine.InputSystem;
 
-public class ObsQuadrupedAgent : MonoBehaviour
+public class Obstacle {
+    public string name;
+    public Vector3 vector3;
+    public Obstacle(string name, Vector3 vector3){
+        this.name = name;
+        this.vector3 = vector3;
+    }
+
+    public override bool Equals(object obj) {
+        // False if null or different type
+        if (obj == null || GetType() != obj.GetType())
+            return false;
+
+        Obstacle o = (Obstacle) obj;
+        return name == o.name && vector3 == o.vector3;
+    }
+    
+    public override int GetHashCode() {
+        return name.GetHashCode() ^ vector3.GetHashCode();
+    }
+}
+
+public class ObsQuadrupedAgent : Agent
 {
 
     [Header("Quadruped's Joints")]
@@ -44,8 +66,11 @@ public class ObsQuadrupedAgent : MonoBehaviour
     [Header("Speed")]
     public float targetSpeed = 10.0f;
 
+    public Transform agentSpawnArea;
+
     [Header("Target")]
-    #region TAREGT VARIABLES
+    #region TARGET VARIABLES
+    public Transform targetSpawnArea;
     public Transform target;
     public Transform referenceOrigin;
     public float targetPawHeight = 0.3f;
@@ -58,7 +83,7 @@ public class ObsQuadrupedAgent : MonoBehaviour
     public LayerMask groundLayer;
     private float groundWitdh;
     private float groundHeight;
-    // private float maxDistanceToGround = -1.0f;
+    private float maxDistanceToGround = -1.0f;
     #endregion
     
     [Header("Limits")]
@@ -68,8 +93,14 @@ public class ObsQuadrupedAgent : MonoBehaviour
     #endregion
 
     [Header("Obstacles")]
+    public bool generateObstacles = false;
     public ObstacleManager obstacleManager;
-    public int numObstacles = 10;
+    public int numObstacles = 5;
+    public int nRaycasts = 10;
+    public Transform raycastOrigin;
+    public float raycastLength = 10.0f;
+    public float raycastAngle = 30.0f;
+    private List<Obstacle> currentObstacles = new List<Obstacle>();
 
     #region Utilities
 
@@ -118,23 +149,25 @@ public class ObsQuadrupedAgent : MonoBehaviour
         /// </summary>
         public void setRandomTargetPosition(){
             Vector3 newPosition;
-            Debug.Log("Placing target");
             int trials = 0;
             do {
-                newPosition = Utilities.getRandomGroundPosition(groundWitdh, groundHeight, referenceOrigin);
+                // newPosition = Utilities.getRandomGroundPosition(groundWitdh, groundHeight, referenceOrigin, heightOffset: 0.13f);
+                newPosition = Utilities.getRandomPlanePosition(targetSpawnArea, referenceOrigin, heightOffset: 0.13f);
                 if (trials > 1000)
                 {
                     Debug.Log("Too many trials while placing target");
                     break;
                 }
                 trials++;
-            } while (Utilities.isObjectInPosition(newPosition, 3.0f, groundLayer));
-            target.position = newPosition;
-            Debug.Log("Target placed");
+            } while (Utilities.isObjectInPosition(newPosition, 2.0f, groundLayer));
+            Debug.Log("Trials: " + trials);
+            target.transform.position = newPosition;
+            
+            // Debug.Log("Target placed");
             
             // Set random z rotation
-            Vector3 randomYDirection = Utilities.getRandomDirectionXYZ(x: false, y: true, z: false);
-            target.rotation = Quaternion.Euler(randomYDirection);
+            // Vector3 randomYDirection = Utilities.getRandomDirectionXYZ(x: false, y: true, z: false);
+            // target.rotation = Quaternion.Euler(randomYDirection);
 
             return;
         }
@@ -144,19 +177,20 @@ public class ObsQuadrupedAgent : MonoBehaviour
         /// </summary>
         public void setRandomAgentPosition(){
             Vector3 newPosition;
-            Debug.Log("Placing agent");
             int trials = 0;
             do {
-                newPosition = Utilities.getRandomGroundPosition(groundWitdh, groundHeight, referenceOrigin, limitOffset: 0.3f, heightOffset: 1.0f);
+                // newPosition = Utilities.getRandomGroundPosition(groundWitdh, groundHeight, referenceOrigin, limitOffset: 0.3f, heightOffset: 1.0f);
+                newPosition = Utilities.getRandomPlanePosition(agentSpawnArea, referenceOrigin, heightOffset: 0.0f);
                 if (trials > 1000)
                 {
                     Debug.Log("Too many trials while placing the agent");
                     break;
                 }
                 trials++;
-            } while (Utilities.isObjectInPosition(newPosition, 5.0f, groundLayer));
+            } while (Utilities.isObjectInPosition(newPosition, 2.0f, groundLayer));
+            Debug.Log("Trials: " + trials);
             transform.position = newPosition;
-            Debug.Log("Agent placed");
+            // Debug.Log("Agent placed");
             
             // Set random z rotation
             transform.rotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
@@ -205,11 +239,8 @@ public class ObsQuadrupedAgent : MonoBehaviour
         /// </summary>
         public void ResetObstacles()
         {
-            Debug.Log("Resetting obstacles");
-            obstacleManager.clearObstacles();
-            Debug.Log("Obstacles cleared");
-            obstacleManager.placeObstacles(numObstacles);
-            Debug.Log("Obstacles placed");
+            obstacleManager.clearObstacles(transform.parent.parent);
+            obstacleManager.placeObstacles(numObstacles, transform.parent.parent);
         }
 
     #endregion
@@ -362,6 +393,10 @@ public class ObsQuadrupedAgent : MonoBehaviour
             return false;
         }
 
+        public bool isTouchingObstacle(){
+            return Utilities.isTouchingByTag(transform, "obstacle");
+        }
+
     #endregion
 
     #region DEBUG    
@@ -401,522 +436,592 @@ public class ObsQuadrupedAgent : MonoBehaviour
             }
         }
 
+        public Transform launchRaycast(Vector3 origin, Vector3 direction, float length, string targetTag, UnityEngine.Color color){
+            // Normalize the direction just in case it isn't
+            Vector3 normalizedDirection = Vector3.Normalize(direction);
+            RaycastHit hit;
+            
+            // Draw the ray
+            Debug.DrawRay(origin, direction * length, color);
+            
+            if (Physics.Raycast(origin, direction, out hit, length))
+            {
+                if(hit.collider.gameObject.tag == targetTag){
+                    // Debug.Log("Hit object with tag:" + hit.collider.gameObject.tag);
+                    return hit.collider.transform;
+                }
+            }
+            return null;
+        }
+
+        public List<Obstacle> launchRaycastSet(Vector3 origin, float length=10.0f, int n=5, float angle=30.0f, string targetTag="obstacle"){
+            
+            Vector3 agentForward = Vector3.Normalize(transform.forward);
+            agentForward.y = 0;
+
+            List<Obstacle> foundObstacles = new List<Obstacle>();
+
+            for (int i = 0; i < n; i++)
+            {
+                Vector3 directionPos = Quaternion.Euler(0, angle * i, 0) * agentForward;
+                Vector3 directionNeg = Quaternion.Euler(0, -angle * i, 0) * agentForward;
+                Transform raycastResult;
+
+                // Middle raycast
+                raycastResult = launchRaycast(origin, agentForward, length, targetTag, Color.red);
+                if (raycastResult != null && !foundObstacles.Contains(new Obstacle(raycastResult.name, raycastResult.position)) && foundObstacles.Count < numObstacles)
+                {
+                    // Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                    foundObstacles.Add(new Obstacle(raycastResult.name, raycastResult.position));
+                }
+                // if (raycastResult != null && !isObstacleRegistered(raycastResult))
+                // {
+                //     Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                //     currentObstacles.Add(new Obstacle(raycastResult.name, raycastResult.position));
+                // }
+
+                // Positive raycast
+                raycastResult = launchRaycast(origin, directionPos, length, targetTag, Color.green);
+                if (raycastResult != null && !foundObstacles.Contains(new Obstacle(raycastResult.name, raycastResult.position)) && foundObstacles.Count < numObstacles)
+                {
+                    // Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                    foundObstacles.Add(new Obstacle(raycastResult.name, raycastResult.position));
+                }
+                // if (raycastResult != null && !isObstacleRegistered(raycastResult))
+                // {
+                //     Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                //     currentObstacles.Add(new Obstacle(raycastResult.name, raycastResult.position));
+                // }
+
+                // Negative raycast
+                raycastResult = launchRaycast(origin, directionNeg, length, targetTag, Color.blue);
+                if (raycastResult != null && !foundObstacles.Contains(new Obstacle(raycastResult.name, raycastResult.position)) && foundObstacles.Count < numObstacles)
+                {
+                    // Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                    foundObstacles.Add(new Obstacle(raycastResult.name, raycastResult.position));
+                }
+                // if (raycastResult != null && !isObstacleRegistered(raycastResult))
+                // {
+                //     Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                //     currentObstacles.Add(new Obstacle(raycastResult.name, raycastResult.position));
+                // }
+            }
+
+            return foundObstacles;
+        }
+
+        public List<Obstacle> findObstacles(bool debug=true){
+            // Get obstacles found in this frame
+            List<Obstacle> foundObstacles = launchRaycastSet(raycastOrigin.position, raycastLength, nRaycasts, raycastAngle, "obstacle");
+            // If there are less than 5 obstacles, add the rest as "none"
+            int freeSpots = numObstacles - foundObstacles.Count;
+            for (int i = 0; i < freeSpots; i++)
+            {
+                foundObstacles.Add(new Obstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
+            }
+            // Print the name of the obstacles found in a single line
+            if(debug){
+                // Draw a ray from the agent to the obstacles
+                foreach (Obstacle obstacle in foundObstacles)
+                {
+                    if (obstacle.vector3 != new Vector3(-1.0f, -1.0f, -1.0f)){
+                        Debug.DrawRay(raycastOrigin.position, obstacle.vector3 - raycastOrigin.position, Color.yellow);
+                    }
+                }
+            }
+            return foundObstacles;
+        }
+
     #endregion
 
-    // #region REWARD FUNCTION
+    #region REWARD FUNCTION
 
-    //     /// <summary>
-    //     /// Punish the agent if it is touching the limits
-    //     /// </summary>
-    //     /// <returns>
-    //     public void punishTouchingLimits(){
-    //         if (touchingLimits(true)){
-    //             // Debug.Log("Agent is touching the limits (-0.1)");
-    //             AddReward(-0.1f);
-    //         }
-    //     }
+        /// <summary>
+        /// Punish the agent if it is touching the limits
+        /// </summary>
+        /// <returns>
+        public void punishTouchingLimits(float weight = 0.1f){
+            if (touchingLimits()){
+                // Debug.Log("Agent is touching the limits (-0.1)");
+                AddReward(-1f*weight);
+            }
+        }
 
-    //     /// <summary>
-    //     /// Falling means resetting the episode with a high negative reward.
-    //     /// Were the reward to be small, the agent could decide that falling is the easiest/quickest way to maximize the reward.
-    //     /// </summary>
-    //     public void punishFalling(){
-    //         if (agentFell()){
-    //             AddReward(-0.1f);
-    //             // Debug.Log("Agent fell");
-    //             // EndEpisode();
-    //         }
-    //     }
+        public void punishTouchingObstacles(float weight = 1.0f){
+            if (isTouchingObstacle()){
+                // Debug.Log("Agent is touching an obstacle (-0.1)");
+                AddReward(-1f * weight);
+            }
+        }
 
-    //     /// <summary>
-    //     /// Reward the agent if it is touching the target
-    //     /// </summary>
-    //     public void rewardTouchingTarget(){
-    //         if (touchingTarget()){
-    //             AddReward(1.0f);
-    //             // Debug.Log("Agent is touching the target (+10)");
-    //             EndEpisode();
-    //         }
-    //     }
+        /// <summary>
+        /// Falling means resetting the episode with a high negative reward.
+        /// Were the reward to be small, the agent could decide that falling is the easiest/quickest way to maximize the reward.
+        /// </summary>
+        public void punishFalling(float weight = 0.1f){
+            if (agentFell()){
+                AddReward(-1f*weight);
+                // Debug.Log("Agent fell");
+                // EndEpisode();
+            }
+        }
 
-    //     /// <summary>
-    //     /// Reward the agent for decreasing the distance to the ground. Punish it for increasing the distance to the ground
-    //     /// </summary>
-    //     public void rewardDistanceToTarget_easy(float weight = 1.0f){
+        /// <summary>
+        /// Reward the agent if it is touching the target
+        /// </summary>
+        public void rewardTouchingTarget(float weight = 1.0f){
+            if (touchingTarget()){
+                AddReward(1.0f * weight);
+                // Debug.Log("Agent is touching the target (+10)");
+                EndEpisode();
+            }
+        }
+
+        /// <summary>
+        /// Reward the agent for decreasing the distance to the ground. Punish it for increasing the distance to the ground
+        /// </summary>
+        public void rewardDistanceToTarget_easy(float weight = 1.0f){
             
-    //         float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
+            float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
 
-    //         float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : -1 * weight;
-    //         // Debug.Log("Distance to target reward: " + reward);
-    //         AddReward(reward);
-    //         prevDistanceToTarget = currentDistanceToTarget;
-    //     }
+            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : -2 * weight;
+            // Debug.Log("Distance to target reward: " + reward);
+            AddReward(reward);
+            prevDistanceToTarget = currentDistanceToTarget;
+        }
 
-    //     /// <summary>
-    //     /// Reward the agent for decreasing the minimum distance record to the target. Punish it for increasing the distance to the target
-    //     /// </summary>
-    //     public void rewardDistanceToTarget_hard(float weight = 1.0f){
+        /// <summary>
+        /// Reward the agent for decreasing the minimum distance record to the target. Punish it for increasing the distance to the target
+        /// </summary>
+        public void rewardDistanceToTarget_hard(float weight = 1.0f){
             
-    //         float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
+            float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
 
-    //         float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : -1 * weight;
-    //         // Debug.Log("Distance to target reward: " + reward);
-    //         AddReward(reward);
-    //         prevDistanceToTarget = currentDistanceToTarget < prevDistanceToTarget? currentDistanceToTarget : prevDistanceToTarget;
-    //     }
+            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : -1 * weight;
+            // Debug.Log("Distance to target reward: " + reward);
+            AddReward(reward);
+            prevDistanceToTarget = currentDistanceToTarget < prevDistanceToTarget? currentDistanceToTarget : prevDistanceToTarget;
+        }
 
-    //     public void rewardTargetAlignment(float weight = 1.0f){
-    //         Vector3 agentForward = Vector3.Normalize(transform.forward);
-    //         agentForward.y = 0;
-    //         Vector3 agentToTarget = Vector3.Normalize(target.transform.position - transform.position);
-    //         agentToTarget.y = 0;
-    //         float reward = Utilities.vectorLikeness(agentForward, agentToTarget) * weight;
-    //         AddReward(reward);
-    //     }
+        public void rewardTargetAlignment(float weight = 1.0f){
+            Vector3 agentForward = Vector3.Normalize(transform.forward);
+            agentForward.y = 0;
+            Vector3 agentToTarget = Vector3.Normalize(target.transform.position - transform.position);
+            agentToTarget.y = 0;
+            float reward = Utilities.vectorLikeness(agentForward, agentToTarget) * weight;
+            AddReward(reward);
+        }
 
-    //     public void rewardGroundAlignment(float weight = 1.0f){
-    //         float likeness = checkGroundAlignment();
+        public void rewardGroundAlignment(float weight = 1.0f){
+            float likeness = checkGroundAlignment();
             
-    //         // Doesn't affect if there is no ground below????
-    //         if (likeness < -1f){
-    //             Debug.Log("No ground below!");
-    //             return;
-    //         }
+            // Doesn't affect if there is no ground below????
+            if (likeness < -1f){
+                Debug.Log("No ground below!");
+                return;
+            }
 
-    //         if (likeness < 0){
-    //             AddReward(-1 * weight);
-    //         } else {
-    //             float punishment = - (1 - likeness) * weight;
-    //             AddReward(punishment * weight);
-    //         }
-    //     }
+            if (likeness < 0){
+                AddReward(-1 * weight);
+            } else {
+                float punishment = - (1 - likeness) * weight;
+                AddReward(punishment * weight);
+            }
+        }
 
-    //     public void rewardSmoothMovement(float weight = 1.0f){
+        public void rewardSmoothMovement(float weight = 1.0f){
             
-    //         foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-    //         {
-    //             float effectiveStrength = joint.Value.effectiveStrength;
-    //             float maxJointStrength = joint.Value.maxStrength;
-    //             float strengthRatio = effectiveStrength / maxJointStrength;
-    //             float reward = - strengthRatio * weight;
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                float effectiveStrength = joint.Value.effectiveStrength;
+                float maxJointStrength = joint.Value.maxStrength;
+                float strengthRatio = effectiveStrength / maxJointStrength;
+                float reward = - strengthRatio * weight;
 
-    //             AddReward(reward);
-    //         }
+                AddReward(reward);
+            }
 
-    //     }
+        }
 
-    //     public void punishBruteRotations(float weight = 1.0f){
-    //         foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-    //         {
-    //             Quaternion prevRotation = joint.Value.prevRotation;
-    //             Quaternion targetRotation = joint.Value.joint.targetRotation;
-    //             float angle = Utilities.getQuaternionAngle(prevRotation, targetRotation);
-    //             float normalizedAngle = Utilities.normalizeAngle(angle);
+        public void punishBruteRotations(float weight = 1.0f){
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                Quaternion prevRotation = joint.Value.prevRotation;
+                Quaternion targetRotation = joint.Value.joint.targetRotation;
+                float angle = Utilities.getQuaternionAngle(prevRotation, targetRotation);
+                float normalizedAngle = Utilities.normalizeAngle(angle);
 
-    //             float punishment = - normalizedAngle * weight;
-    //             AddReward(punishment);
-    //         }
-    //     }
+                float punishment = - normalizedAngle * weight;
+                AddReward(punishment);
+            }
+        }
 
-    //     public void punishBruteRotationsFromInit(float weight = 1.0f){
-    //         foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-    //         {
-    //             Quaternion prevRotation = joint.Value.initialRotation;
-    //             Quaternion targetRotation = joint.Value.joint.targetRotation;
-    //             float angle = Utilities.getQuaternionAngle(prevRotation, targetRotation);
-    //             float normalizedAngle = Utilities.normalizeAngle(angle);
+        public void punishBruteRotationsFromInit(float weight = 1.0f){
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                Quaternion prevRotation = joint.Value.initialRotation;
+                Quaternion targetRotation = joint.Value.joint.targetRotation;
+                float angle = Utilities.getQuaternionAngle(prevRotation, targetRotation);
+                float normalizedAngle = Utilities.normalizeAngle(angle);
 
-    //             float punishment = - normalizedAngle * weight;
-    //             AddReward(punishment);
-    //         }
-    //     }
+                float punishment = - normalizedAngle * weight;
+                AddReward(punishment);
+            }
+        }
     
 
-    //     /// <summary>
-    //     /// Punish the agent for walking with the knees
-    //     /// </summary>
-    //     /// <param name="weight">
-    //     /// Weight of the punishment
-    //     /// </param>
-    //     public void punishKneeStep(float weight = 1.0f){
-    //         float frontKneeStepping_R = frontUpperLeg_R.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
-    //         float frontKneeStepping_L = frontUpperLeg_L.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
-    //         float backKneeStepping_R = backUpperLeg_R.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
-    //         float backKneeStepping_L = backUpperLeg_L.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
+        /// <summary>
+        /// Punish the agent for walking with the knees
+        /// </summary>
+        /// <param name="weight">
+        /// Weight of the punishment
+        /// </param>
+        public void punishKneeStep(float weight = 1.0f){
+            float frontKneeStepping_R = frontUpperLeg_R.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
+            float frontKneeStepping_L = frontUpperLeg_L.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
+            float backKneeStepping_R = backUpperLeg_R.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
+            float backKneeStepping_L = backUpperLeg_L.GetComponent<checkKneeGrounded>().kneeIsGrounded()? 1f: 0f;
 
-    //         float punishment = - (frontKneeStepping_R + frontKneeStepping_L + backKneeStepping_R + backKneeStepping_L) * weight;
-    //         AddReward(punishment);
-    //     }
+            float punishment = - (frontKneeStepping_R + frontKneeStepping_L + backKneeStepping_R + backKneeStepping_L) * weight;
+            AddReward(punishment);
+        }
 
 
-    //     /// [SOON TO BE DEPRECATED]
-    //     /// <summary>
-    //     /// Reward the agent for walking correctly, punish him for standing still
-    //     /// </summary>
-    //     /// <param name="weight">
-    //     /// Weight of the punishment
-    //     /// </param>
-    //     public void rewardPawStep(float weight = 0.1f){
-    //         float frontPawStepping_R = frontLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
-    //         float frontPawStepping_L = frontLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
-    //         float backPawStepping_R = backLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
-    //         float backPawStepping_L = backLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
+        /// [SOON TO BE DEPRECATED]
+        /// <summary>
+        /// Reward the agent for walking correctly, punish him for standing still
+        /// </summary>
+        /// <param name="weight">
+        /// Weight of the punishment
+        /// </param>
+        public void rewardPawStep(float weight = 0.1f){
+            float frontPawStepping_R = frontLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
+            float frontPawStepping_L = frontLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
+            float backPawStepping_R = backLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
+            float backPawStepping_L = backLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
 
-    //         float pawsStepping = (frontPawStepping_R + frontPawStepping_L + backPawStepping_R + backPawStepping_L);
-    //         if (pawsStepping <= 3){
-    //             float reward = 1 * weight;
-    //             AddReward(reward);
-    //         } else {
-    //             float punishment = - 1 * weight;
-    //             AddReward(punishment);
-    //         }
-    //     }
+            float pawsStepping = (frontPawStepping_R + frontPawStepping_L + backPawStepping_R + backPawStepping_L);
+            if (pawsStepping <= 3){
+                float reward = 1 * weight;
+                AddReward(reward);
+            } else {
+                float punishment = - 1 * weight;
+                AddReward(punishment);
+            }
+        }
 
-    //     public void punishBumpyMovement(float lowerLimit = -1.0f, float upperLimit = 1.0f, float weight = 1.0f){
-    //         foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-    //         {
-    //             float effectiveStrength = joint.Value.effectiveStrength;
-    //             float maxJointStrength = joint.Value.maxStrength;
-    //             float strengthRatio = effectiveStrength / maxJointStrength;
-    //             // float reward = - Mathf.Lerp(lowerLimit, upperLimit, strengthRatio) * weight;
-    //             float punishment = - strengthRatio * weight;
+        public void punishBumpyMovement(float lowerLimit = -1.0f, float upperLimit = 1.0f, float weight = 1.0f){
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                float effectiveStrength = joint.Value.effectiveStrength;
+                float maxJointStrength = joint.Value.maxStrength;
+                float strengthRatio = effectiveStrength / maxJointStrength;
+                // float reward = - Mathf.Lerp(lowerLimit, upperLimit, strengthRatio) * weight;
+                float punishment = - strengthRatio * weight;
 
-    //             AddReward(punishment);
-    //         }
-    //     }        
+                AddReward(punishment);
+            }
+        }        
 
-    //     // public void punishPawKneeRelativeDistance(float kneeDistancePerc = 0.75f, float weight = 1.0f){
-    //     //     // Front right
-    //     //     float frontPawToGround_R = Utilities.checkDistanceToGround(frontPaw_R.position, groundLayer);
-    //     //     float frontKneeToGround_R = Utilities.checkDistanceToGround(frontKnee_R.position, groundLayer);
-    //     //     float punishmentFrontPawKnee_R = - frontPawToGround_R/frontKneeToGround_R;
+        private float calcPawHeightReward(Transform paw){
+            float pawToGround = Utilities.checkDistanceToGround(paw.position, groundLayer);
+            float rewardPawHeight = pawToGround/targetPawHeight;
+            if (rewardPawHeight > 1.0f){
+                return (1-rewardPawHeight);
+            }
+            return rewardPawHeight;
+        }
 
-    //     //     // Front left
-    //     //     float frontPawToGround_L = Utilities.checkDistanceToGround(frontPaw_L.position, groundLayer);
-    //     //     float frontKneeToGround_L = Utilities.checkDistanceToGround(frontKnee_L.position, groundLayer);
-    //     //     float punishmentFrontPawKnee_L = - frontPawToGround_L/frontKneeToGround_L;
-
-    //     //     // Back right
-    //     //     float backPawToGround_R = Utilities.checkDistanceToGround(backPaw_R.position, groundLayer);
-    //     //     float backKneeToGround_R = Utilities.checkDistanceToGround(backKnee_R.position, groundLayer);
-    //     //     float punishmentBackPawKnee_R = - backPawToGround_R/backKneeToGround_R;
-
-    //     //     // Back left
-    //     //     float backPawToGround_L = Utilities.checkDistanceToGround(backPaw_L.position, groundLayer);
-    //     //     float backKneeToGround_L = Utilities.checkDistanceToGround(backKnee_L.position, groundLayer);
-    //     //     float punishmentBackPawKnee_L = - backPawToGround_L/backKneeToGround_L;
-
-    //     //     float punishment = (punishmentFrontPawKnee_R + punishmentFrontPawKnee_L + punishmentBackPawKnee_R + punishmentBackPawKnee_L) * weight;
-    //     //     AddReward(punishment);
-    //     // }
-
-    //     private float calcPawHeightReward(Transform paw){
-    //         float pawToGround = Utilities.checkDistanceToGround(paw.position, groundLayer);
-    //         float rewardPawHeight = pawToGround/targetPawHeight;
-    //         if (rewardPawHeight > 1.0f){
-    //             return (1-rewardPawHeight);
-    //         }
-    //         return rewardPawHeight;
-    //     }
-
-    //     public void rewardWalkGait(float tooManyContactsWeight = 1.0f, float crossedContactsWeight = 1.0f, float targetPawHeightWeight = 1.0f){
+        public void rewardWalkGait(float tooManyContactsWeight = 1.0f, float crossedContactsWeight = 1.0f, float targetPawHeightWeight = 1.0f){
             
-    //         // Check which legs are touching the gorund 
-    //         bool frontLegRTouchingGround = Utilities.isTouching(frontLowerLeg_R, ground);
-    //         bool frontLegLTouchingGround = Utilities.isTouching(frontLowerLeg_L, ground);
-    //         bool backLegRTouchingGround = Utilities.isTouching(backLowerLeg_R, ground);
-    //         bool backLegLTouchingGround = Utilities.isTouching(backLowerLeg_L, ground);
+            // Check which legs are touching the gorund 
+            bool frontLegRTouchingGround = Utilities.isTouching(frontLowerLeg_R, ground);
+            bool frontLegLTouchingGround = Utilities.isTouching(frontLowerLeg_L, ground);
+            bool backLegRTouchingGround = Utilities.isTouching(backLowerLeg_R, ground);
+            bool backLegLTouchingGround = Utilities.isTouching(backLowerLeg_L, ground);
 
-    //         // Punish more than 3 or less than 2 legs touching the ground
-    //         float touchingGroundAmount = (frontLegRTouchingGround ? 1 : 0) + (frontLegLTouchingGround ? 1 : 0) + (backLegRTouchingGround ? 1 : 0) + (backLegLTouchingGround ? 1 : 0);
-    //         if (touchingGroundAmount > 3 || touchingGroundAmount < 2){
-    //             AddReward(-1.0f * tooManyContactsWeight);
-    //         }
+            // Punish more than 3 or less than 2 legs touching the ground
+            float touchingGroundAmount = (frontLegRTouchingGround ? 1 : 0) + (frontLegLTouchingGround ? 1 : 0) + (backLegRTouchingGround ? 1 : 0) + (backLegLTouchingGround ? 1 : 0);
+            if (touchingGroundAmount > 3 || touchingGroundAmount < 2){
+                AddReward(-1.0f * tooManyContactsWeight);
+            }
 
-    //         // Reward the agent for walking with the correct gait
-    //         // if (touchingGroundAmount == 2)
-    //         // {
-    //         //     if(frontLegRTouchingGround && backLegLTouchingGround){
-    //         //         AddReward(1.0f * crossedContactsWeight);
-    //         //     } else if (frontLegLTouchingGround && backLegRTouchingGround){
-    //         //         AddReward(1.0f  * crossedContactsWeight);
-    //         //     }
-    //         // }
+            // Reward the agent for walking with the correct gait
+            // if (touchingGroundAmount == 2)
+            // {
+            //     if(frontLegRTouchingGround && backLegLTouchingGround){
+            //         AddReward(1.0f * crossedContactsWeight);
+            //     } else if (frontLegLTouchingGround && backLegRTouchingGround){
+            //         AddReward(1.0f  * crossedContactsWeight);
+            //     }
+            // }
 
-    //         // Reward the agent for rising the legs up to the target height
-    //         // if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
-    //         // if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
-    //         // if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
-    //         // if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
+            // Reward the agent for rising the legs up to the target height
+            // if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
+            // if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
+            // if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
+            // if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
 
 
-    //     }
+        }
 
-    //     public void punishTouchingGround(float weight = 1.0f){
-    //         float reward = 0.0f;
-    //         // Upper leg R
-    //         bool touchingGround_frontUpperLeg_R = Utilities.isTouching(frontUpperLeg_R, ground);
-    //         reward += touchingGround_frontUpperLeg_R ? - 1 : 0;
-    //         // Upper leg L
-    //         bool touchingGround_frontUpperLeg_L = Utilities.isTouching(frontUpperLeg_L, ground);
-    //         reward += touchingGround_frontUpperLeg_L ? - 1 : 0;
-    //         // Waist R
-    //         bool touchingGround_frontWaist_R = Utilities.isTouching(frontWaist_R, ground);
-    //         reward += touchingGround_frontWaist_R ? - 1 : 0;
-    //         // Waist L
-    //         bool touchingGround_frontWaist_L = Utilities.isTouching(frontWaist_L, ground);
-    //         reward += touchingGround_frontWaist_L ? - 1 : 0;
-    //         // Upper leg R
-    //         bool touchingGround_backUpperLeg_R = Utilities.isTouching(backUpperLeg_R, ground);
-    //         reward += touchingGround_backUpperLeg_R ? - 1 : 0;
-    //         // Upper leg L
-    //         bool touchingGround_backUpperLeg_L = Utilities.isTouching(backUpperLeg_L, ground);
-    //         reward += touchingGround_backUpperLeg_L ? - 1 : 0;
-    //         // Back Waist R
-    //         bool touchingGround_backWaist_R = Utilities.isTouching(backWaist_R, ground);
-    //         reward += touchingGround_backWaist_R ? - 1 : 0;
-    //         // Waist L
-    //         bool touchingGround_backWaist_L = Utilities.isTouching(backWaist_L, ground);
-    //         reward += touchingGround_backWaist_L ? - 1 : 0;
-    //         // this 
-    //         // float touchingGround_this = Utilities.isTouching(transform, ground);
-    //         // reward += touchingGround_this ? - 1 : 0;
+        public void punishTouchingGround(float weight = 1.0f){
+            float reward = 0.0f;
+            // Upper leg R
+            bool touchingGround_frontUpperLeg_R = Utilities.isTouching(frontUpperLeg_R, ground);
+            reward += touchingGround_frontUpperLeg_R ? - 1 : 0;
+            // Upper leg L
+            bool touchingGround_frontUpperLeg_L = Utilities.isTouching(frontUpperLeg_L, ground);
+            reward += touchingGround_frontUpperLeg_L ? - 1 : 0;
+            // Waist R
+            bool touchingGround_frontWaist_R = Utilities.isTouching(frontWaist_R, ground);
+            reward += touchingGround_frontWaist_R ? - 1 : 0;
+            // Waist L
+            bool touchingGround_frontWaist_L = Utilities.isTouching(frontWaist_L, ground);
+            reward += touchingGround_frontWaist_L ? - 1 : 0;
+            // Upper leg R
+            bool touchingGround_backUpperLeg_R = Utilities.isTouching(backUpperLeg_R, ground);
+            reward += touchingGround_backUpperLeg_R ? - 1 : 0;
+            // Upper leg L
+            bool touchingGround_backUpperLeg_L = Utilities.isTouching(backUpperLeg_L, ground);
+            reward += touchingGround_backUpperLeg_L ? - 1 : 0;
+            // Back Waist R
+            bool touchingGround_backWaist_R = Utilities.isTouching(backWaist_R, ground);
+            reward += touchingGround_backWaist_R ? - 1 : 0;
+            // Waist L
+            bool touchingGround_backWaist_L = Utilities.isTouching(backWaist_L, ground);
+            reward += touchingGround_backWaist_L ? - 1 : 0;
+            // this 
+            // float touchingGround_this = Utilities.isTouching(transform, ground);
+            // reward += touchingGround_this ? - 1 : 0;
 
-    //         AddReward(reward * weight);
-    //     }
+            AddReward(reward * weight);
+        }
 
-    //     public void rewardDistanceToGround(float weight = 1.0f){
-    //         float distanceToGround = Utilities.checkDistanceToGround(transform.position, groundLayer);
-    //         // Debug.Log("currentDTG/maxDTG: " + distanceToGround/maxDistanceToGround);
-    //         float distanceToGroundRatio = distanceToGround/maxDistanceToGround;
+        public void rewardDistanceToGround(float weight = 1.0f){
+            float distanceToGround = Utilities.checkDistanceToGround(transform.position, groundLayer);
+            // Debug.Log("currentDTG/maxDTG: " + distanceToGround/maxDistanceToGround);
+            float distanceToGroundRatio = distanceToGround/maxDistanceToGround;
             
-    //         if (distanceToGroundRatio > 1.0f)
-    //         {
-    //             float punishment = (1-distanceToGroundRatio) * weight;
-    //             AddReward(punishment);
-    //         }
+            if (distanceToGroundRatio > 1.0f)
+            {
+                float punishment = (1-distanceToGroundRatio) * weight;
+                AddReward(punishment);
+            }
 
-    //         float reward = distanceToGroundRatio * weight;
-    //         AddReward(reward);
-    //     }
+            float reward = distanceToGroundRatio * weight;
+            AddReward(reward);
+        }
 
-    //     public float mean(float[] values){
-    //         float sum = 0.0f;
-    //         foreach (float value in values){
-    //             sum += value;
-    //         }
-    //         return sum/values.Length;
-    //     }
+        public void punishUnevenWaistHeights(float weight = 1.0f){
+            float[] waistHeights = new float[4];
+            waistHeights[0] = frontWaist_R.position.y;
+            waistHeights[1] = frontWaist_L.position.y;
+            waistHeights[2] = backWaist_R.position.y;
+            waistHeights[3] = backWaist_L.position.y;
 
-    //     // Std
-    //     public float std(float[] values){
-            
-    //         float meanValue = mean(values);
+            float stdWaistHeights = Utilities.std(waistHeights);
+            float punishment = stdWaistHeights * weight;
+            // Debug.Log("Punishment: " + punishment);
+            AddReward(-punishment);
+        }
 
-    //         float sumOfSquares = 0.0f;
-    //         foreach (float value in values)
-    //         {
-    //             sumOfSquares += Mathf.Pow(value - meanValue, 2);
-    //         }
+    #endregion
 
-    //         return Mathf.Sqrt(sumOfSquares/values.Length);
-    //     }
+    #region MLAGENTS
 
-    //     public void punishUnevenWaistHeights(float weight = 1.0f){
-    //         float[] waistHeights = new float[4];
-    //         waistHeights[0] = frontWaist_R.position.y;
-    //         waistHeights[1] = frontWaist_L.position.y;
-    //         waistHeights[2] = backWaist_R.position.y;
-    //         waistHeights[3] = backWaist_L.position.y;
+        public override void Initialize(){
+            // Set up the joints: save initial position, rotation & others
+            setUpJoints();
+            // Get the ground width and height of the ground
+            (groundWitdh, groundHeight) = Utilities.getWidthHeight(ground);
+            // Set random starting position for the target
+            setRandomTargetPosition();
+            // Set random starting position for the agent
+            setRandomAgentPosition();
+            // Initial obstacles
+            if (generateObstacles){
+                obstacleManager.placeObstacles(numObstacles, transform.parent.parent);
+            }
+            currentObstacles = findObstacles();
+        }
 
-    //         float stdWaistHeights = std(waistHeights);
-    //         float punishment = stdWaistHeights * weight;
-    //         // Debug.Log("Punishment: " + punishment);
-    //         AddReward(-punishment);
-    //     }
+        public override void OnEpisodeBegin()
+        {
+            // Reset the joints: initial position and rotation, zero out velocity. Set random position for the agent
+            ResetAgent();
+            // Set random starting position for the target
+            ResetTarget();
+            // Calculate the initial distance to the target
+            prevDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
+            // Calculate the initial distance to the ground
+            if(maxDistanceToGround < 0){
+                Vector3 agentPosition = GetComponent<Rigidbody>().worldCenterOfMass;
+                maxDistanceToGround = Utilities.checkDistanceToGround(agentPosition, groundLayer);
+            }
 
-    // #endregion
+            if (generateObstacles){
+                // Reset the obstacles
+                ResetObstacles();
+            }
 
-    // #region MLAGENTS
+            currentObstacles = findObstacles();
+            // Debug.Log("Obstacles found");
+        }
 
-    //     public override void Initialize(){
-    //         // Set up the joints: save initial position, rotation & others
-    //         setUpJoints();
-    //         // Get the ground width and height of the ground
-    //         (groundWitdh, groundHeight) = Utilities.getWidthHeight(ground);
-    //         // Set random starting position for the target
-    //         setRandomTargetPosition();
-    //         // Set random starting position for the agent
-    //         setRandomAgentPosition();
-    //     }
+        public override void CollectObservations(VectorSensor sensor)
+        {
+            // Position of the target (size 3)
+            sensor.AddObservation(target.position);
 
-    //     public override void OnEpisodeBegin()
-    //     {
-    //         // Reset the joints: initial position and rotation, zero out velocity. Set random position for the agent
-    //         ResetAgent();
-    //         // Set random starting position for the target
-    //         ResetTarget();
-    //         // Calculate the initial distance to the target
-    //         prevDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
-    //         // Calculate the initial distance to the ground
-    //         if(maxDistanceToGround < 0){
-    //             Vector3 agentPosition = GetComponent<Rigidbody>().worldCenterOfMass;
-    //             maxDistanceToGround = Utilities.checkDistanceToGround(agentPosition, groundLayer);
-    //         }
-    //     }
+            // Distance to the ground (size 1)
+            Vector3 agentPosition = GetComponent<Rigidbody>().worldCenterOfMass;
+            sensor.AddObservation(Utilities.checkDistanceToGround(agentPosition, groundLayer));
 
-    //     public override void CollectObservations(VectorSensor sensor)
-    //     {
-    //         // Position of the target (size 3)
-    //         sensor.AddObservation(target.position);
+            // Velocity of the agent (3)
+            Vector3 avgJointVelocityVal = getAvgJointVelocity();
+            sensor.AddObservation(avgJointVelocityVal);
 
-    //         // Distance to the ground (size 1)
-    //         Vector3 agentPosition = GetComponent<Rigidbody>().worldCenterOfMass;
-    //         sensor.AddObservation(Utilities.checkDistanceToGround(agentPosition, groundLayer));
+            // Angular velocity of the agent (3)
+            sensor.AddObservation(GetComponent<Rigidbody>().angularVelocity);
 
-    //         // Velocity of the agent (3)
-    //         Vector3 avgJointVelocityVal = getAvgJointVelocity();
-    //         sensor.AddObservation(avgJointVelocityVal);
+            // Rotation vector from the agent's forward to the target's position on the XZ axis (size 4)
+            Vector3 agentForward = Vector3.Normalize(transform.forward);
+            agentForward.y = 0;
+            Vector3 agentToTarget = Vector3.Normalize(target.transform.position - transform.position);
+            agentToTarget.y = 0;
 
-    //         // Angular velocity of the agent (3)
-    //         sensor.AddObservation(GetComponent<Rigidbody>().angularVelocity);
+            sensor.AddObservation(Quaternion.FromToRotation(agentForward, agentToTarget));
 
-    //         // Rotation vector from the agent's forward to the target's position on the XZ axis (size 4)
-    //         Vector3 agentForward = Vector3.Normalize(transform.forward);
-    //         agentForward.y = 0;
-    //         Vector3 agentToTarget = Vector3.Normalize(target.transform.position - transform.position);
-    //         agentToTarget.y = 0;
+            // Vector forward of the agent (size 3)
+            sensor.AddObservation(agentForward); 
 
-    //         sensor.AddObservation(Quaternion.FromToRotation(agentForward, agentToTarget));
+            // Vector to the target (size 3)
+            sensor.AddObservation(agentToTarget);
 
-    //         // Vector forward of the agent (size 3)
-    //         sensor.AddObservation(agentForward); 
+            // Distance to the target (size 1)
+            sensor.AddObservation(Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true));
 
-    //         // Vector to the target (size 3)
-    //         sensor.AddObservation(agentToTarget);
+            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
+            {
+                // Position, velocity and angular velocity of the rigidbodies of the joints (size 12*(3+3+3) = 108)
+                sensor.AddObservation(joint.Value.rigidbody.position);
+                sensor.AddObservation(joint.Value.rigidbody.velocity);
+                sensor.AddObservation(joint.Value.rigidbody.angularVelocity);
 
-    //         // Distance to the target (size 1)
-    //         sensor.AddObservation(Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true));
+                // Angular difference between the rotation taken in the last step and the one before that (size 1 * 12 = 12)
+                // UNDER TESTING
+                // float angle = Utilities.getQuaternionAngle(joint.Value.initialRotation, joint.Value.joint.targetRotation);
+                // float normalizedAngle = Utilities.normalizeAngle(angle);
+                // sensor.AddObservation(normalizedAngle);
 
-    //         foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-    //         {
-    //             // Position, velocity and angular velocity of the rigidbodies of the joints (size 12*(3+3+3) = 108)
-    //             sensor.AddObservation(joint.Value.rigidbody.position);
-    //             sensor.AddObservation(joint.Value.rigidbody.velocity);
-    //             sensor.AddObservation(joint.Value.rigidbody.angularVelocity);
+                // Effective strength in the last step (size 1 * 12 = 12)
+                sensor.AddObservation(joint.Value.effectiveStrength);
 
-    //             // Angular difference between the rotation taken in the last step and the one before that (size 1 * 12 = 12)
-    //             float angle = Utilities.getQuaternionAngle(joint.Value.initialRotation, joint.Value.joint.targetRotation);
-    //             float normalizedAngle = Utilities.normalizeAngle(angle);
-    //             sensor.AddObservation(normalizedAngle);
+                // Is the joint touching the ground (1 * 12 = 12)
+                sensor.AddObservation(Utilities.isTouching(joint.Value.transform, ground) ? 1 : 0);
+            }
 
-    //             // Effective strength in the last step (size 1 * 12 = 12)
-    //             sensor.AddObservation(joint.Value.effectiveStrength);
-
-    //             // Is the joint touching the ground (1 * 12 = 12)
-    //             sensor.AddObservation(Utilities.isTouching(joint.Value.transform, ground) ? 1 : 0);
-    //         }
+            // Obstacles found in the last step (size 3 * numObstacles = 3*5 = 15)
+            foreach (Obstacle obstacle in currentObstacles)
+            {
+                sensor.AddObservation(obstacle.vector3);
+            }
         
-    //         // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 3 + 1 + 108 + 12 +12 + 12= 165
-    //     }
+            // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 3 + 1 + 108 + 12 + 12 + 15 = 165
+        }
 
-    //     public override void OnActionReceived(ActionBuffers actionBuffers)
-    //     {
-    //         int i = 0;
-    //         //           JOINT                      X Axis                   Y Axis                 Z Axis                 Strength  
-    //         moveJoint(frontLowerLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(frontLowerLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(frontUpperLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(frontUpperLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(frontWaist_L,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(frontWaist_R,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(backLowerLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(backLowerLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(backUpperLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(backUpperLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(backWaist_L,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
-    //         moveJoint(backWaist_R,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
+        public override void OnActionReceived(ActionBuffers actionBuffers)
+        {
+            int i = 0;
+            //           JOINT                      X Axis                   Y Axis                 Z Axis                 Strength  
+            moveJoint(frontLowerLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontLowerLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontUpperLeg_L, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontUpperLeg_R, actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontWaist_L,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
+            moveJoint(frontWaist_R,    0 ,                                      0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
+            moveJoint(backLowerLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(backLowerLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(backUpperLeg_L,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(backUpperLeg_R,  actionBuffers.ContinuousActions[i++],    0,   0,                                    actionBuffers.ContinuousActions[i++]);
+            moveJoint(backWaist_L,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
+            moveJoint(backWaist_R,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
         
 
-    //         // STAGE 1
+            // STAGE 1
                 
-    //             // PHASE 1
-    //                 // rewardDistanceToTarget_easy(weight: 0.5f);
-    //             // PHASE 2
-    //                 rewardDistanceToTarget_hard(weight: 0.5f);
-    //                 rewardTargetAlignment(weight: 0.5f);
+                // PHASE 1
+                    // rewardDistanceToTarget_easy(weight: 0.5f);
+                // PHASE 2
+                    rewardDistanceToTarget_hard(weight: 0.5f);
+                    rewardTargetAlignment(weight: 0.5f);
+                    // punishTouchingGround(weight: 0.5f);
 
-    //         // STAGE 2
-    //         punishKneeStep(weight: 1f); // max -4
-    //         rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.25f, targetPawHeightWeight: 0.2f);
-    //         rewardGroundAlignment(weight: 1f);
-    //         punishUnevenWaistHeights(weight: 0.25f);
-    //         rewardDistanceToGround(weight: 0.1f);
+            // // STAGE 2
+            punishKneeStep(weight: 1f); // max -4
+            rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.25f, targetPawHeightWeight: 0.2f);
+            rewardGroundAlignment(weight: 1f);
+            punishUnevenWaistHeights(weight: 0.30f);
+            rewardDistanceToGround(weight: 0.20f);
 
-    //         // STAGE 3
-    //         // punishTouchingGround(weight: 0.5f); // max -8
-    //         // punishBruteRotationsFromInit(weight: 0.2f); // max -12
-    //         // punishBumpyMovement(weight: 0.2f); // max -12
-
-    //         // PHASE 4
-
-    //         // PHASE 5
-
+            // // STAGE 3
+            // punishBumpyMovement(weight: 0.2f); // max -12
+            // // If there are obstacles on sight, punish the agent
+            // foreach (Obstacle obstacle in currentObstacles){
+            //     if (obstacle.name != "none"){
+            //         AddReward(-0.6f);
+            //     }
+            // }
             
-    //         // Learn quadruped walking gait
-    //         // PHASE 4
 
-    //         // New Quad Agent V6
-    //         // punishTouchingGround(weight: 0.1f);
-    //         // punishBruteRotations(weight: 0.25f);
-    //         // punishBumpyMovement(weight: 0.25f);
+        }
 
-    //         // PHASE 5
-    //         // punishPawKneeRelativeDistance(weight: 0.1f);
+        void FixedUpdate()
+        {
+            // Reward the agent if it is touching the target
+            rewardTouchingTarget();
+            // Punish the agent if it fell 
+            punishFalling();
+            // Punish the agent if it is touching the limits
+            punishTouchingLimits();
+            // Punish the agent if it is touching an obstacle
+            punishTouchingObstacles();
 
+            // Get current obstacles
+            currentObstacles = findObstacles();
 
-    //     }
+            drawToTargetGuideline();
+            drawKneeToGround();
+            drawPawToGround();
+        }
 
-    //     void FixedUpdate()
-    //     {
-    //         // Reward the agent if it is touching the target
-    //         rewardTouchingTarget();
-    //         // Punish the agent if it fell 
-    //         punishFalling();
-    //         // Punish the agent if it is touching the limits
-    //         punishTouchingLimits();
-
-    //         drawToTargetGuideline();
-    //         drawKneeToGround();
-    //         drawPawToGround();
-    //     }
-
-    // #endregion
+    #endregion
 
     // Start is called before the first frame update
     
-    void Start()
-    {
-        setUpJoints();
-        (groundWitdh, groundHeight) = Utilities.getWidthHeight(ground);
-        obstacleManager.placeObstacles(numObstacles);
-        setRandomTargetPosition();
-        setRandomAgentPosition();
-    }
-
-
-    // Update is called once per frame
-    void Update()
-    {
-        drawToTargetGuideline();
-        agentFell();
-        drawKneeToGround();
-        drawPawToGround();
-        // moveJoint();
-        if(Input.GetKeyDown(KeyCode.Space)){
-            ResetObstacles();
-            ResetTarget();
-            ResetAgent();
-        }
-    }
+//     void Start()
+//     {
+//         setUpJoints();
+//         (groundWitdh, groundHeight) = Utilities.getWidthHeight(ground);
+//         obstacleManager.placeObstacles(numObstacles, transform.parent.parent);
+//         setRandomTargetPosition();
+//         setRandomAgentPosition();
+//         currentObstacles = findObstacles();
+//     }
+//   // Update is called once per frame
+//     void Update()
+//     {
+//         // drawToTargetGuideline();
+//         agentFell();
+//         // drawKneeToGround();
+//         // drawPawToGround();
+//         currentObstacles = findObstacles();
+//         isTouchingObstacle();
+//         if(Input.GetKeyDown(KeyCode.Space)){
+//             ResetObstacles();
+//             ResetTarget();
+//             ResetAgent();
+//         }
+//     }
 }

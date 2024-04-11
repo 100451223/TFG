@@ -369,6 +369,17 @@ public class QuadrupedAgent : Agent
         }
 
         void OnDrawGizmos(){
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(frontPaw_R.position, 0.2f);
+            Gizmos.DrawWireSphere(frontPaw_L.position, 0.2f);
+            Gizmos.DrawWireSphere(backPaw_R.position, 0.2f);
+            Gizmos.DrawWireSphere(backPaw_L.position, 0.2f);
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(frontKnee_R.position, 0.3f);
+            Gizmos.DrawWireSphere(frontKnee_L.position, 0.3f);
+            Gizmos.DrawWireSphere(backKnee_R.position, 0.3f);
+            Gizmos.DrawWireSphere(backKnee_L.position, 0.3f);
             
             foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
             {
@@ -818,7 +829,7 @@ public class QuadrupedAgent : Agent
                 
                 // PHASE 1
                     // rewardDistanceToTarget_easy(weight: 0.5f);
-                // PHASE 2
+                // // PHASE 2
                     rewardDistanceToTarget_hard(weight: 0.5f);
                     rewardTargetAlignment(weight: 0.5f);
 
@@ -829,29 +840,8 @@ public class QuadrupedAgent : Agent
             punishUnevenWaistHeights(weight: 0.25f);
             rewardDistanceToGround(weight: 0.1f);
 
-            // STAGE 3
-            // punishTouchingGround(weight: 0.5f); // max -8
-            // punishBruteRotationsFromInit(weight: 0.2f); // max -12
-            // punishBumpyMovement(weight: 0.2f); // max -12
-
-            // PHASE 4
-
-            // PHASE 5
-
-            
-            // Learn quadruped walking gait
-            // PHASE 4
-
-            // New Quad Agent V6
-            // punishTouchingGround(weight: 0.1f);
-            // punishBruteRotations(weight: 0.25f);
-            // punishBumpyMovement(weight: 0.25f);
-
-            // PHASE 5
-            // punishPawKneeRelativeDistance(weight: 0.1f);
-
-
         }
+
 
         void FixedUpdate()
         {
