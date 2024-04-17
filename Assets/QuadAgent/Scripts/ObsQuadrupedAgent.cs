@@ -160,7 +160,7 @@ public class ObsQuadrupedAgent : Agent
                 }
                 trials++;
             } while (Utilities.isObjectInPosition(newPosition, 2.0f, groundLayer));
-            Debug.Log("Trials: " + trials);
+            // Debug.Log("Trials: " + trials);
             target.transform.position = newPosition;
             
             // Debug.Log("Target placed");
@@ -188,7 +188,7 @@ public class ObsQuadrupedAgent : Agent
                 }
                 trials++;
             } while (Utilities.isObjectInPosition(newPosition, 2.0f, groundLayer));
-            Debug.Log("Trials: " + trials);
+            // Debug.Log("Trials: " + trials);
             transform.position = newPosition;
             // Debug.Log("Agent placed");
             
@@ -549,7 +549,6 @@ public class ObsQuadrupedAgent : Agent
 
         public void punishTouchingObstacles(float weight = 1.0f){
             if (isTouchingObstacle()){
-                // Debug.Log("Agent is touching an obstacle (-0.1)");
                 AddReward(-1f * weight);
             }
         }
@@ -747,20 +746,20 @@ public class ObsQuadrupedAgent : Agent
             }
 
             // Reward the agent for walking with the correct gait
-            // if (touchingGroundAmount == 2)
-            // {
-            //     if(frontLegRTouchingGround && backLegLTouchingGround){
-            //         AddReward(1.0f * crossedContactsWeight);
-            //     } else if (frontLegLTouchingGround && backLegRTouchingGround){
-            //         AddReward(1.0f  * crossedContactsWeight);
-            //     }
-            // }
+            if (touchingGroundAmount == 2)
+            {
+                if(frontLegRTouchingGround && backLegLTouchingGround){
+                    AddReward(1.0f * crossedContactsWeight);
+                } else if (frontLegLTouchingGround && backLegRTouchingGround){
+                    AddReward(1.0f  * crossedContactsWeight);
+                }
+            }
 
             // Reward the agent for rising the legs up to the target height
-            // if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
-            // if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
-            // if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
-            // if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
+            if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
+            if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
+            if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
+            if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
 
 
         }
@@ -824,6 +823,28 @@ public class ObsQuadrupedAgent : Agent
             float punishment = stdWaistHeights * weight;
             // Debug.Log("Punishment: " + punishment);
             AddReward(-punishment);
+        }
+
+        public void punishDistanceToObs(float weight = 1.0f){
+            // Get current distance to target
+            float distanceToTarget = Utilities.distanceTo(raycastOrigin.position, target.position, x: true, y: false, z: true);
+            
+            foreach (Obstacle obstacle in currentObstacles){
+                if (obstacle.name != "none"){
+                    // Get the distance to the obstacle
+                    float distanceToObs = Utilities.distanceTo(raycastOrigin.position, obstacle.vector3, x: true, y: false, z: true);
+
+                    if (distanceToTarget < distanceToObs){
+                        // The obstacle is behind the target, don't punsih
+                        continue;
+                    } else {
+                        // The obstacle is in front of the target
+                        float punishment = - (1 - distanceToObs/raycastLength);
+                        AddReward(punishment * weight);
+                    }
+                    
+                }
+            }
         }
 
     #endregion
@@ -949,30 +970,45 @@ public class ObsQuadrupedAgent : Agent
             moveJoint(backWaist_R,     0,                                       0,   actionBuffers.ContinuousActions[i++], actionBuffers.ContinuousActions[i++]);
         
 
+            int nObs = 0;
+            foreach (Obstacle obstacle in currentObstacles){
+                if (obstacle.name != "none"){
+                    nObs++;
+                }
+            }
+
             // STAGE 1
                 
                 // PHASE 1
                     // rewardDistanceToTarget_easy(weight: 0.5f);
                 // PHASE 2
+                if (nObs == 0){
                     rewardDistanceToTarget_hard(weight: 0.5f);
                     rewardTargetAlignment(weight: 0.5f);
-                    // punishTouchingGround(weight: 0.5f);
+                } else {
+                    rewardDistanceToTarget_hard(weight: 0.5f); // max 1
+                    // rewardTargetAlignment(weight: 0.1f);
+                    punishDistanceToObs(weight: 0.30f); // max 1
+                }
 
-            // // STAGE 2
-            punishKneeStep(weight: 1f); // max -4
-            rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.25f, targetPawHeightWeight: 0.2f);
-            rewardGroundAlignment(weight: 1f);
-            punishUnevenWaistHeights(weight: 0.30f);
-            rewardDistanceToGround(weight: 0.20f);
+            // STAGE 2
+                // PHASE 1
+                    punishKneeStep(weight: 1f); // max -4
+                // PHASE 2
+                    rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.2f, targetPawHeightWeight: 0.2f);
+                    rewardGroundAlignment(weight: 1f);            
+                    punishUnevenWaistHeights(weight: 0.30f);            
+                    rewardDistanceToGround(weight: 0.20f);
 
-            // // STAGE 3
-            // punishBumpyMovement(weight: 0.2f); // max -12
-            // // If there are obstacles on sight, punish the agent
-            // foreach (Obstacle obstacle in currentObstacles){
-            //     if (obstacle.name != "none"){
-            //         AddReward(-0.6f);
-            //     }
-            // }
+            // STAGE 3
+            // Allow crossedContactsWegight and targetPawHeightWeight
+            
+            // STAGE 4
+            // Activate obstacle spawning
+
+            
+            
+            
             
 
         }
@@ -986,7 +1022,7 @@ public class ObsQuadrupedAgent : Agent
             // Punish the agent if it is touching the limits
             punishTouchingLimits();
             // Punish the agent if it is touching an obstacle
-            punishTouchingObstacles();
+            punishTouchingObstacles(weight: 1.0f);
 
             // Get current obstacles
             currentObstacles = findObstacles();

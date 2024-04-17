@@ -7177,7 +7177,7 @@ Transform:
   m_GameObject: {fileID: 5043866304155786225}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.34, y: 0, z: 0}
-  m_LocalScale: {x: 1.54, y: 1, z: 0.23849416}
+  m_LocalScale: {x: 1.23, y: 1, z: 0.23849416}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7793541917103567128}
@@ -8900,7 +8900,7 @@ MonoBehaviour:
   limitsLayer:
     serializedVersion: 2
     m_Bits: 64
-  generateObstacles: 0
+  generateObstacles: 1
   obstacleManager: {fileID: 5329319103819210070}
   numObstacles: 1
   nRaycasts: 3
@@ -9830,7 +9830,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e9c106f558316b45aa9f699834dce9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  obstaclePrefab: {fileID: 8092582986602453473, guid: 70c34ef54c2b3414dac3358e14a21bfc, type: 3}
+  obstaclePrefab: {fileID: 8910830810279054997, guid: 70c34ef54c2b3414dac3358e14a21bfc, type: 3}
   obstacleSpawnArea: {fileID: 7722688363783119787}
   referenceOrigin: {fileID: 2631473603211835783}
   groundLayer:
