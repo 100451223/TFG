@@ -8,6 +8,7 @@ TagManager:
   - ground
   - target
   - obstacle
+  - subgoal
   layers:
   - Default
   - TransparentFX
@@ -17,8 +18,8 @@ TagManager:
   - UI
   - limit
   - spawnArea
-  - 
-  - 
+  - agent
+  - obstacle
   - 
   - 
   - 

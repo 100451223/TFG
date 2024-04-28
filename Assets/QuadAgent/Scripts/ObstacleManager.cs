@@ -44,15 +44,15 @@ public class ObstacleManager : MonoBehaviour
         }
     }
 
-    public void clearObstacles(Transform parent)
-    {
-        foreach (Transform child in parent)
-        {
-            if (child.gameObject.CompareTag("obstacle"))
-            {
-                Destroy(child.gameObject);
-            }
-        }
-    }
+    // public void clearObstacles(Transform parent)
+    // {
+    //     foreach (Transform child in parent)
+    //     {
+    //         if (child.gameObject.CompareTag("obstacle"))
+    //         {
+    //             Destroy(child.gameObject);
+    //         }
+    //     }
+    // }
 
 }

@@ -9,31 +9,7 @@ using UtilitiesSpace;
 using Obstacles;
 using UnityEngine.InputSystem;
 
-// public class Obstacle {
-//     public string name;
-//     public Vector3 vector3;
-//     public Transform transform;
-//     public Obstacle(string name, Vector3 vector3, Transform transform=null){
-//         this.name = name;
-//         this.vector3 = vector3;
-//         this.transform = transform;
-//     }
-
-//     public override bool Equals(object obj) {
-//         // False if null or different type
-//         if (obj == null || GetType() != obj.GetType())
-//             return false;
-
-//         Obstacle o = (Obstacle) obj;
-//         return name == o.name && vector3 == o.vector3;
-//     }
-    
-//     public override int GetHashCode() {
-//         return name.GetHashCode() ^ vector3.GetHashCode();
-//     }
-// }
-
-public class ObsQuadrupedAgent : Agent
+public class DynamicONA : Agent
 {
 
     [Header("Quadruped's Joints")]
@@ -73,7 +49,9 @@ public class ObsQuadrupedAgent : Agent
 
     [Header("Target")]
     #region TARGET VARIABLES
+    public GameObject dynamicTargetPrefab;
     public Transform targetSpawnArea;
+    public Transform originalTarget;
     public Transform target;
     public Transform referenceOrigin;
     public float targetPawHeight = 0.3f;
@@ -105,8 +83,12 @@ public class ObsQuadrupedAgent : Agent
     public Transform raycastOrigin;
     public float raycastLength = 10.0f;
     public float raycastAngle = 30.0f;
-    public List<Obstacle> currentObstacles = new List<Obstacle>();
-    // public List<Obstacle> obstaclesOnSight = new List<Obstacle>();
+    public List<DynaObstacle> currentObstacles = new List<DynaObstacle>();
+    [Header("Subgoals")]
+    private Subgoal currentSubgoal = null;
+    public bool chasingSubgoal = false;
+    public bool subgoalToBeDestroyed = false;
+    // public List<DynaObstacle> obstaclesOnSight = new List<DynaObstacle>();
 
     #region Utilities
 
@@ -240,6 +222,17 @@ public class ObsQuadrupedAgent : Agent
             return;   
         }
 
+        public void ResetSubgoal(){
+            if (currentSubgoal != null){
+                subgoalToBeDestroyed = true;
+                Destroy(currentSubgoal.gameObj);
+                currentSubgoal = null;
+                chasingSubgoal = false;
+                target = originalTarget;
+                subgoalToBeDestroyed = false;
+            }
+        }
+
 
         public void setRandomObstaclePosition(){
             Vector3 newPosition;
@@ -257,7 +250,7 @@ public class ObsQuadrupedAgent : Agent
             // Debug.Log("Trials: " + trials);
             obstacle.transform.position = newPosition;
             
-            // Debug.Log("Obstacle placed");
+            // Debug.Log("DynaObstacle placed");
             
             // Set random z rotation
             // Vector3 randomYDirection = Utilities.getRandomDirectionXYZ(x: false, y: true, z: false);
@@ -272,10 +265,10 @@ public class ObsQuadrupedAgent : Agent
         public void ResetObstacles()
         {
             // Reset the list of current obstacles
-            currentObstacles = new List<Obstacle>();
+            currentObstacles = new List<DynaObstacle>();
             for (int i = 0; i < numObstacles; i++)
             {
-                currentObstacles.Add(new Obstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
+                currentObstacles.Add(new DynaObstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
             }
             
             // Reset obstacle position
@@ -284,10 +277,10 @@ public class ObsQuadrupedAgent : Agent
         }
 
         public void setDummyObstacles(){
-            currentObstacles = new List<Obstacle>();
+            currentObstacles = new List<DynaObstacle>();
             for (int i = 0; i < numObstacles; i++)
             {
-                currentObstacles.Add(new Obstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
+                currentObstacles.Add(new DynaObstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
             }
         }
 
@@ -418,7 +411,8 @@ public class ObsQuadrupedAgent : Agent
         /// </returns>
         public bool touchingTarget(bool debug=false)
         {
-            if(Utilities.isTouching(transform, target))
+
+            if(Utilities.isTouching(transform, target) && !subgoalToBeDestroyed)
             {
                 if (debug) Debug.Log("Agent is touching the target");
                 return true;
@@ -493,69 +487,155 @@ public class ObsQuadrupedAgent : Agent
             
             if (Physics.Raycast(origin, direction, out hit, length, layerMask))
             {
-                // if(hit.collider.gameObject.tag == targetTag){
-                //     return hit.collider.transform;
-                //     // Debug.Log("Hit object with tag:" + hit.collider.gameObject.tag);
-                // }
                 return hit.collider;
             }
             return null;
         }
 
-        public List<Obstacle> launchRaycastSet(Vector3 origin, float length=10.0f, int n=5, float angle=30.0f, string targetTag="obstacle"){
+        private Subgoal addCandidate(Vector3 position, Color color){
+            // Create a sphere with a radius of 3 units at the position
+            
+            int obstacleLayer = LayerMask.NameToLayer("obstacle");
+            int layerMask = 1 << obstacleLayer;
+            bool obstacles_found = Physics.CheckSphere(position, 5.0f, layerMask);
+            if (!obstacles_found){
+                // GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                // sphere.transform.position = position;
+                // sphere.transform.localScale = new Vector3(5f, 5f, 5f);
+                // disable colider
+                // sphere.GetComponent<Collider>().enabled = false;
+                // Destroy(sphere, 1f);
+                float subgoalDistanceToTarget = Utilities.distanceTo(position, originalTarget.position, x: true, y: false, z: true);
+                return new Subgoal(position, subgoalDistanceToTarget);
+            }
+            return null;
+        }
+
+        private Subgoal findBestSubgoal(List<Subgoal> subgoalCandidates){
+            Subgoal bestCandidate = null;
+            float minDistance = 9999999.0f;
+            foreach (Subgoal candidate in subgoalCandidates)
+            {
+                if (candidate.distanceToTarget < minDistance){
+                    minDistance = candidate.distanceToTarget;
+                    bestCandidate = candidate;
+                }
+            }
+            return bestCandidate;
+        }
+
+        private GameObject setNewSubgoal(Vector3 position){
+            // Instantiate a new dynamic target
+            GameObject newSubgoal = Instantiate(dynamicTargetPrefab, position, Quaternion.identity);
+            newSubgoal.name = "Subgoal";
+            newSubgoal.transform.SetParent(transform.parent.parent);
+            chasingSubgoal = true;
+            return newSubgoal;
+        }
+
+        public void setSubgoalAsTarget(Subgoal subgoal){
+            target = subgoal.gameObj.transform;
+        }
+
+        public List<DynaObstacle> launchRaycastSet(Vector3 origin, float length=10.0f, int n=5, float angle=30.0f, string targetTag="obstacle"){
             
             Vector3 agentForward = Vector3.Normalize(transform.forward);
             agentForward.y = 0;
 
-            List<Obstacle> foundObstacles = new List<Obstacle>();
+            bool obstacleFound = false;
+            List<DynaObstacle> foundObstacles = new List<DynaObstacle>();
+            List<Subgoal> subgoalCandidates = new List<Subgoal>();
+            Collider raycastResult;
 
+            // Middle raycast
+            raycastResult = launchRaycast(origin, agentForward, length, targetTag, Color.red);
+            if (raycastResult != null)
+            {
+                // If the agent sees an obstacle and it can still hold more obstacles
+                if (raycastResult.gameObject.tag == "obstacle")
+                {
+                    obstacleFound = true;
+                    // Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                    DynaObstacle newObstacle = new DynaObstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
+                    if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle))
+                        foundObstacles.Add(newObstacle);
+                }
+            } else {
+                Vector3 raycastEnd = origin + agentForward * length;
+                Subgoal candidate = addCandidate(raycastEnd, Color.red);
+                if (candidate != null) subgoalCandidates.Add(candidate);
+            }
+
+            // Side raycasts
             for (int i = 0; i < n; i++)
             {
                 Vector3 directionPos = Quaternion.Euler(0, angle * i, 0) * agentForward;
                 Vector3 directionNeg = Quaternion.Euler(0, -angle * i, 0) * agentForward;
-                Collider raycastResult;
-
-                // Middle raycast
-                raycastResult = launchRaycast(origin, agentForward, length, targetTag, Color.red);
-                if (raycastResult != null)
-                {
-                    // If the agent sees an obstacle and it can still hold more obstacles
-                    if (raycastResult.gameObject.tag == "obstacle"){
-                        // Debug.Log("Raycast hit object with name: " + raycastResult.name);
-                        Obstacle newObstacle = new Obstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
-                        if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle)){
-                            // AddReward(0.1f);
-                            foundObstacles.Add(newObstacle);
-                        }
-                    }
-                }
 
                 // Positive raycast
                 raycastResult = launchRaycast(origin, directionPos, length, targetTag, Color.green);
                 if (raycastResult != null)
                 {
-                    // Debug.Log("Raycast hit object with name: " + raycastResult.name);
                     if (raycastResult.gameObject.tag == "obstacle"){
+                        obstacleFound = true;
                         // Debug.Log("Raycast hit object with name: " + raycastResult.name);
-                        Obstacle newObstacle = new Obstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
-                        if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle)){
-                            // AddReward(0.1f);
+                        DynaObstacle newObstacle = new DynaObstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
+                        if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle))
                             foundObstacles.Add(newObstacle);
-                        }
                     }
+                } else {
+                    Vector3 raycastEnd = origin + directionPos * length;
+                    Subgoal candidate = addCandidate(raycastEnd, Color.green);
+                    if (candidate != null) subgoalCandidates.Add(candidate);
                 }
 
                 // Negative raycast
                 raycastResult = launchRaycast(origin, directionNeg, length, targetTag, Color.blue);
                 if (raycastResult != null)
                 {
-                    // Debug.Log("Raycast hit object with name: " + raycastResult.name);
                     if (raycastResult.gameObject.tag == "obstacle"){
+                        obstacleFound = true;
                         // Debug.Log("Raycast hit object with name: " + raycastResult.name);
-                        Obstacle newObstacle = new Obstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
-                        if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle)){
-                            // AddReward(0.1f);
+                        DynaObstacle newObstacle = new DynaObstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
+                        if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle))
                             foundObstacles.Add(newObstacle);
+                    }
+                } else {
+                    Vector3 raycastEnd = origin + directionNeg * length;
+                    Subgoal candidate = addCandidate(raycastEnd, Color.blue);
+                    if (candidate != null) subgoalCandidates.Add(candidate);
+                }
+
+                // Find the best subgoal candidate to avoid the obstacle
+                if (obstacleFound){
+                    Subgoal bestCandidate = findBestSubgoal(subgoalCandidates);
+                    if (bestCandidate != null){
+                        if (!chasingSubgoal){
+                            // If not already chasing a subgoal, set the new subgoal to avoid the obstacle
+                            bestCandidate.gameObj = setNewSubgoal(bestCandidate.position);
+                            currentSubgoal = bestCandidate;
+                            chasingSubgoal = true;
+                            setSubgoalAsTarget(currentSubgoal);
+                        } else {
+                            // If already chasing a subgoal, check if the new subgoal is better than the current one
+                            float subgoalDistanceToTarget = bestCandidate.distanceToTarget;
+                            float ratio = subgoalDistanceToTarget / currentSubgoal.distanceToTarget;
+                            
+                            float minDistToObs = 9999999.0f;
+                            foreach (DynaObstacle obstacle in foundObstacles)
+                            {
+                                float dist = Utilities.distanceTo(transform.position, obstacle.transform.position, x: true, y: false, z: true);
+                                if (dist < minDistToObs){
+                                    minDistToObs = dist;
+                                }
+                            }
+
+                            if (ratio < 0.75 && minDistToObs > 5.0f){
+                                bestCandidate.gameObj = setNewSubgoal(bestCandidate.position);
+                                setSubgoalAsTarget(bestCandidate);
+                                Destroy(currentSubgoal.gameObj);
+                                currentSubgoal = bestCandidate;
+                            }
                         }
                     }
                 }
@@ -564,43 +644,24 @@ public class ObsQuadrupedAgent : Agent
             return foundObstacles;
         }
 
-        public List<Obstacle> findObstacles(bool debug=true){
+        public List<DynaObstacle> findObstacles(bool debug=true){
             // Get obstacles found in this frame
-            List<Obstacle> foundObstacles = launchRaycastSet(raycastOrigin.position, raycastLength, nRaycasts, raycastAngle, "obstacle");
-
-            foreach (Obstacle obstacle in foundObstacles)
-            {
-                if (currentObstacles.Contains(obstacle)){
-                    // The obstacle was already found
-                    // Debug.Log("Obstacle already found");
-                    continue;
-                } else {
-                    if (currentObstacles.Count < numObstacles){
-                        // The obstacle is new
-                        Debug.Log("Uh oh, problems! Too few obstacles");
-                    } else {
-                        // Remove the oldest obstacle
-                        currentObstacles.RemoveAt(currentObstacles.Count - 1);
-                        // Add the new obstacle
-                        currentObstacles.Insert(0, obstacle);
-                    }
-                }
-            }
-            
+            List<DynaObstacle> currentObstacles = launchRaycastSet(raycastOrigin.position, raycastLength, nRaycasts, raycastAngle, "obstacle");
             
             // If there are less than 5 obstacles, add the rest as "none"
-            // int freeSpots = numObstacles - foundObstacles.Count;
-            // for (int i = 0; i < freeSpots; i++)
-            // {
-            //     foundObstacles.Add(new Obstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
-            // }
+            int freeSpots = numObstacles - currentObstacles.Count;
+            for (int i = 0; i < freeSpots; i++)
+            {
+                currentObstacles.Add(new DynaObstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
+            }
+
             // // Print the name of the obstacles found in a single line
             if(debug){
                 // Draw a ray from the agent to the obstacles
-                foreach (Obstacle obstacle in currentObstacles)
+                foreach (DynaObstacle obstacle in currentObstacles)
                 {
                     if (obstacle.name != "none"){
-                        // Debug.Log("Obstacle found: " + obstacle.name + "; Transform: " + obstacle.transform.position);
+                        // Debug.Log("DynaObstacle found: " + obstacle.name + "; Transform: " + obstacle.transform.position);
                         Debug.DrawRay(raycastOrigin.position, obstacle.transform.position - raycastOrigin.position, Color.yellow);
                     }
                 }
@@ -625,20 +686,6 @@ public class ObsQuadrupedAgent : Agent
             }
         }
 
-        public void punishTouchingObstacles(float weight = 1.0f, bool debug = false){
-            foreach (Obstacle obstacle in currentObstacles)
-            {
-                if (obstacle.name != "none" && obstacle.transform != null)
-                {
-                    if (Utilities.isTouching(transform, obstacle.transform))
-                    {
-                        if (debug) Debug.Log("Agent is touching an obstacle");
-                        AddReward(-1f*weight);
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Falling means resetting the episode with a high negative reward.
         /// Were the reward to be small, the agent could decide that falling is the easiest/quickest way to maximize the reward.
@@ -655,10 +702,19 @@ public class ObsQuadrupedAgent : Agent
         /// Reward the agent if it is touching the target
         /// </summary>
         public void rewardTouchingTarget(float weight = 1.0f){
-            if (touchingTarget()){
+            if (touchingTarget() && !chasingSubgoal){
+                ResetSubgoal();
                 AddReward(1.0f * weight);
                 // Debug.Log("Agent is touching the target (+10)");
                 EndEpisode();
+            }
+        }
+
+        public void rewardTouchingSubgoal(float weight = 1.0f){
+            if(Utilities.isTouchingByTag(transform, "subgoal")){
+                Debug.Log("Agent is touching a subgoal");
+                ResetSubgoal();
+                AddReward(1.0f * weight);
             }
         }
 
@@ -831,21 +887,21 @@ public class ObsQuadrupedAgent : Agent
                 AddReward(-1.0f * tooManyContactsWeight);
             }
 
-            // // Reward the agent for walking with the correct gait
-            // if (touchingGroundAmount == 2)
-            // {
-            //     if(frontLegRTouchingGround && backLegLTouchingGround){
-            //         AddReward(1.0f * crossedContactsWeight);
-            //     } else if (frontLegLTouchingGround && backLegRTouchingGround){
-            //         AddReward(1.0f  * crossedContactsWeight);
-            //     }
-            // }
+            // Reward the agent for walking with the correct gait
+            if (touchingGroundAmount == 2)
+            {
+                if(frontLegRTouchingGround && backLegLTouchingGround){
+                    AddReward(1.0f * crossedContactsWeight);
+                } else if (frontLegLTouchingGround && backLegRTouchingGround){
+                    AddReward(1.0f  * crossedContactsWeight);
+                }
+            }
 
-            // // // Reward the agent for rising the legs up to the target height
-            // if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
-            // if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
-            // if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
-            // if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
+            // // Reward the agent for rising the legs up to the target height
+            if (!frontLegRTouchingGround) AddReward(calcPawHeightReward(frontPaw_R) * targetPawHeightWeight);
+            if (!frontLegLTouchingGround) AddReward(calcPawHeightReward(frontPaw_L) * targetPawHeightWeight);
+            if (!backLegRTouchingGround) AddReward(calcPawHeightReward(backPaw_R) * targetPawHeightWeight);
+            if (!backLegLTouchingGround) AddReward(calcPawHeightReward(backPaw_L) * targetPawHeightWeight);
 
 
         }
@@ -909,28 +965,6 @@ public class ObsQuadrupedAgent : Agent
             float punishment = stdWaistHeights * weight;
             // Debug.Log("Punishment: " + punishment);
             AddReward(-punishment);
-        }
-
-        public void punishDistanceToObs(float weight = 1.0f, float raycastLengthDangerRatio = 0.3f){
-            // Get current distance to target
-            float distanceToTarget = Utilities.distanceTo(raycastOrigin.position, target.position, x: true, y: false, z: true);
-            
-            foreach (Obstacle obstacle in currentObstacles){
-                if (obstacle.name != "none"){
-                    // Get the distance to the obstacle
-                    float distanceToObs = Utilities.distanceTo(raycastOrigin.position, obstacle.vector3, x: true, y: false, z: true);
-                    float punishment = 0.0f;
-                    if (distanceToTarget < distanceToObs || distanceToObs > raycastLength*raycastLengthDangerRatio){
-                        // The obstacle is behind the target or too far away, don't punsih
-                        continue;
-                    } else {
-                        // The obstacle is close and in front of the target
-                        punishment = - (1 - distanceToObs/(raycastLength*raycastLengthDangerRatio));
-                    }
-                    AddReward(punishment * weight);
-                    // Debug.Log("Punishment for '" + obstacle.name + "': " + punishment);
-                }
-            }
         }
 
     #endregion
@@ -1032,22 +1066,6 @@ public class ObsQuadrupedAgent : Agent
                 // Is the joint touching the ground (1 * 12 = 12)
                 sensor.AddObservation(Utilities.isTouching(joint.Value.transform, ground) ? 1 : 0);
             }
-
-            // Obstacles found in the last step (size 3 * numObstacles + numObstacles = 3*1 + 1 = 4)
-            foreach (Obstacle obstacle in currentObstacles)
-            {
-                // Give it the position of the obstacle
-                sensor.AddObservation(obstacle.vector3);
-                // Give it the distance to the obstacle
-                float distanceToObs = 9999999999999999.9f;
-                int touchingObstacle = 0;
-                if(obstacle.name != "none"){
-                    distanceToObs = Utilities.distanceTo(raycastOrigin.position, obstacle.vector3, x: true, y: false, z: true);
-                    touchingObstacle = Utilities.isTouching(transform, obstacle.transform)? 1 : 0;
-                }
-                sensor.AddObservation(distanceToObs);
-                sensor.AddObservation(touchingObstacle);
-            }
         
             // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 3 + 1 + 108 + 12 + 12 + 15 = 165
         }
@@ -1077,16 +1095,16 @@ public class ObsQuadrupedAgent : Agent
                 // PHASE 2
                     // rewardDistanceToTarget_hard(weight: 0.5f);
 
-                // if (nObs > 0) {
-                // }
-
             // STAGE 2
-            // punishKneeStep(weight: 1f); // max -4
-            // rewardDistanceToGround(weight: 0.20f);
-            // punishTouchingGround(weight: 0.10f);
-            // rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.2f, targetPawHeightWeight: 0.3f);
-            // rewardGroundAlignment(weight: 1f);            
-            // punishUnevenWaistHeights(weight: 0.30f);
+            punishKneeStep(weight: 1f); // max -4
+            rewardDistanceToGround(weight: 0.20f);
+            punishTouchingGround(weight: 0.10f);
+            rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.2f, targetPawHeightWeight: 0.3f);
+            rewardGroundAlignment(weight: 1f);            
+            punishUnevenWaistHeights(weight: 0.30f);
+
+            // STAGE 3
+            // punishBumpyMovement(weight: 0.1f);
                         
 
             // STAGE 3
@@ -1101,6 +1119,8 @@ public class ObsQuadrupedAgent : Agent
         {
             // Reward the agent if it is touching the target
             rewardTouchingTarget();
+            // Reward the agent if it is touching a subgoal
+            rewardTouchingSubgoal();
             // Punish the agent if it fell 
             punishFalling(weight: 0.1f);
             // Punish the agent if it is touching the limits
@@ -1109,11 +1129,10 @@ public class ObsQuadrupedAgent : Agent
             // if (obstaclesOn){
             //     punishTouchingObstacles(weight: 0.5f);
             // }
+            
 
             if(obstaclesOn){
                 findObstacles();
-                punishDistanceToObs(weight: 0.10f, raycastLengthDangerRatio: 0.5f); // max 1
-                punishTouchingObstacles(weight: 0.10f);
             }
             drawToTargetGuideline();
             drawKneeToGround();
@@ -1141,11 +1160,11 @@ public class ObsQuadrupedAgent : Agent
     //     setUpJoints();
     //     (groundWitdh, groundHeight) = Utilities.getWidthHeight(ground);
     //     // Initial obstacles
-    //     currentObstacles = new List<Obstacle>();
+    //     currentObstacles = new List<DynaObstacle>();
     //     if (generateObstacles){
     //         for (int i = 0; i < numObstacles; i++)
     //         {
-    //             currentObstacles.Add(new Obstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
+    //             currentObstacles.Add(new DynaObstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
     //         }
     //     }
 
@@ -1168,7 +1187,7 @@ public class ObsQuadrupedAgent : Agent
 
     //     //Print name of the obstacles found in a single line
     //     string obstaclesFound = "";
-    //     foreach (Obstacle obstacle in currentObstacles)
+    //     foreach (DynaObstacle obstacle in currentObstacles)
     //     {
     //         obstaclesFound += obstacle.name + " ";
     //     }

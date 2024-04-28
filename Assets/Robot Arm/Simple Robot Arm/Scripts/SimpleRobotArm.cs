@@ -238,6 +238,7 @@ public class SimpleRobotArm : Agent
 
     public override void OnEpisodeBegin()
     {
+        Debug.Log("OnEpisodeBegin");
         // Reset the arm to a random direction
         // ResetArm();
         // Reset the target

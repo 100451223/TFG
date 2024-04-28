@@ -1,0 +1,875 @@
+(MLPythonEnv) PS C:\Users\zeros\OneDrive\Documentos\MLAgents> mlagents-learn '.\TFG\TFG Unity Project\Assets\QuadAgent\Training\DynamicONA.yaml' --run-id=DynaONA_Stage2Extended --resume
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+
+            ┐  ╖
+        ╓╖╬│╡  ││╬╖╖
+    ╓╖╬│││││┘  ╬│││││╬╖
+ ╖╬│││││╬╜        ╙╬│││││╖╖                               ╗╗╗
+ ╬╬╬╬╖││╦╖        ╖╬││╗╣╣╣╬      ╟╣╣╬    ╟╣╣╣             ╜╜╜  ╟╣╣
+ ╬╬╬╬╬╬╬╬╖│╬╖╖╓╬╪│╓╣╣╣╣╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╒╣╣╖╗╣╣╣╗   ╣╣╣ ╣╣╣╣╣╣ ╟╣╣╖   ╣╣╣
+ ╬╬╬╬┐  ╙╬╬╬╬│╓╣╣╣╝╜  ╫╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╟╣╣╣╙ ╙╣╣╣  ╣╣╣ ╙╟╣╣╜╙  ╫╣╣  ╟╣╣
+ ╬╬╬╬┐     ╙╬╬╣╣      ╫╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╟╣╣╬   ╣╣╣  ╣╣╣  ╟╣╣     ╣╣╣┌╣╣╜
+ ╬╬╬╜       ╬╬╣╣      ╙╝╣╣╬      ╙╣╣╣╗╖╓╗╣╣╣╜ ╟╣╣╬   ╣╣╣  ╣╣╣  ╟╣╣╦╓    ╣╣╣╣╣
+ ╙   ╓╦╖    ╬╬╣╣   ╓╗╗╖            ╙╝╣╣╣╣╝╜   ╘╝╝╜   ╝╝╝  ╝╝╝   ╙╣╣╣    ╟╣╣╣
+   ╩╬╬╬╬╬╬╦╦╬╬╣╣╗╣╣╣╣╣╣╣╝                                             ╫╣╣╣╣
+      ╙╬╬╬╬╬╬╬╣╣╣╣╣╣╝╜
+          ╙╬╬╬╣╣╣╜
+             ╙
+
+ Version information:
+  ml-agents: 1.1.0.dev0,
+  ml-agents-envs: 1.1.0.dev0,
+  Communicator API: 1.5.0,
+  PyTorch: 2.1.1+cu121
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+[INFO] Listening on port 5004. Start training by pressing the Play button in the Unity Editor.
+[INFO] Connected to Unity environment with package version 2.0.1 and communication version 1.5.0
+[INFO] Connected new brain: DynamicONA?team=0
+[INFO] Hyperparameters for behavior name DynamicONA:
+        trainer_type:   ppo
+        hyperparameters:
+          batch_size:   2048
+          buffer_size:  20480
+          learning_rate:        0.0003
+          beta: 0.0005
+          epsilon:      0.2
+          lambd:        0.95
+          num_epoch:    3
+          shared_critic:        False
+          learning_rate_schedule:       linear
+          beta_schedule:        constant
+          epsilon_schedule:     linear
+        checkpoint_interval:    500000
+        network_settings:
+          normalize:    True
+          hidden_units: 512
+          num_layers:   3
+          vis_encode_type:      simple
+          memory:       None
+          goal_conditioning_type:       hyper
+          deterministic:        False
+        reward_signals:
+          extrinsic:
+            gamma:      0.99
+            strength:   1.0
+            network_settings:
+              normalize:        False
+              hidden_units:     128
+              num_layers:       2
+              vis_encode_type:  simple
+              memory:   None
+              goal_conditioning_type:   hyper
+              deterministic:    False
+        init_path:      None
+        keep_checkpoints:       5
+        even_checkpoints:       False
+        max_steps:      20000000
+        time_horizon:   1000
+        summary_freq:   10000
+        threaded:       False
+        self_play:      None
+        behavioral_cloning:     None
+[INFO] Resuming from results\DynaONA_Stage2Extended\DynamicONA.
+[INFO] Resuming training from step 7472954.
+[INFO] DynamicONA. Step: 7480000. Time Elapsed: 49.432 s. Mean Reward: -84.580. Std of Reward: 92.355. Training.
+[INFO] DynamicONA. Step: 7490000. Time Elapsed: 83.255 s. Mean Reward: -96.005. Std of Reward: 66.558. Training.
+[INFO] DynamicONA. Step: 7500000. Time Elapsed: 118.397 s. Mean Reward: -105.663. Std of Reward: 106.846. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-7499914.onnx
+[INFO] DynamicONA. Step: 7510000. Time Elapsed: 150.827 s. Mean Reward: -98.490. Std of Reward: 93.636. Training.
+[INFO] DynamicONA. Step: 7520000. Time Elapsed: 186.123 s. Mean Reward: -101.315. Std of Reward: 84.690. Training.
+[INFO] DynamicONA. Step: 7530000. Time Elapsed: 216.678 s. Mean Reward: -107.239. Std of Reward: 81.402. Training.
+[INFO] DynamicONA. Step: 7540000. Time Elapsed: 244.474 s. Mean Reward: -99.087. Std of Reward: 69.732. Training.
+[INFO] DynamicONA. Step: 7550000. Time Elapsed: 269.086 s. Mean Reward: -90.581. Std of Reward: 68.522. Training.
+[INFO] DynamicONA. Step: 7560000. Time Elapsed: 297.010 s. Mean Reward: -92.773. Std of Reward: 87.653. Training.
+[INFO] DynamicONA. Step: 7570000. Time Elapsed: 322.616 s. Mean Reward: -102.181. Std of Reward: 92.875. Training.
+[INFO] DynamicONA. Step: 7580000. Time Elapsed: 349.901 s. Mean Reward: -94.556. Std of Reward: 67.895. Training.
+[INFO] DynamicONA. Step: 7590000. Time Elapsed: 374.735 s. Mean Reward: -108.555. Std of Reward: 133.505. Training.
+[INFO] DynamicONA. Step: 7600000. Time Elapsed: 404.016 s. Mean Reward: -101.274. Std of Reward: 87.574. Training.
+[INFO] DynamicONA. Step: 7610000. Time Elapsed: 435.944 s. Mean Reward: -114.616. Std of Reward: 124.701. Training.
+[INFO] DynamicONA. Step: 7620000. Time Elapsed: 467.285 s. Mean Reward: -97.125. Std of Reward: 99.460. Training.
+[INFO] DynamicONA. Step: 7630000. Time Elapsed: 497.817 s. Mean Reward: -84.782. Std of Reward: 53.379. Training.
+[INFO] DynamicONA. Step: 7640000. Time Elapsed: 528.908 s. Mean Reward: -101.653. Std of Reward: 100.764. Training.
+[INFO] DynamicONA. Step: 7650000. Time Elapsed: 557.864 s. Mean Reward: -92.028. Std of Reward: 86.622. Training.
+[INFO] DynamicONA. Step: 7660000. Time Elapsed: 589.329 s. Mean Reward: -91.284. Std of Reward: 59.051. Training.
+[INFO] DynamicONA. Step: 7670000. Time Elapsed: 619.433 s. Mean Reward: -80.940. Std of Reward: 54.970. Training.
+[INFO] DynamicONA. Step: 7680000. Time Elapsed: 651.240 s. Mean Reward: -92.826. Std of Reward: 88.195. Training.
+[INFO] DynamicONA. Step: 7690000. Time Elapsed: 680.822 s. Mean Reward: -96.579. Std of Reward: 171.951. Training.
+[INFO] DynamicONA. Step: 7700000. Time Elapsed: 714.452 s. Mean Reward: -87.551. Std of Reward: 65.647. Training.
+[INFO] DynamicONA. Step: 7710000. Time Elapsed: 743.176 s. Mean Reward: -97.949. Std of Reward: 135.993. Training.
+[INFO] DynamicONA. Step: 7720000. Time Elapsed: 775.442 s. Mean Reward: -94.077. Std of Reward: 78.650. Training.
+[INFO] DynamicONA. Step: 7730000. Time Elapsed: 804.004 s. Mean Reward: -99.556. Std of Reward: 102.182. Training.
+[INFO] DynamicONA. Step: 7740000. Time Elapsed: 837.048 s. Mean Reward: -90.984. Std of Reward: 62.128. Training.
+[INFO] DynamicONA. Step: 7750000. Time Elapsed: 865.474 s. Mean Reward: -101.319. Std of Reward: 102.861. Training.
+[INFO] DynamicONA. Step: 7760000. Time Elapsed: 894.680 s. Mean Reward: -95.567. Std of Reward: 70.473. Training.
+[INFO] DynamicONA. Step: 7770000. Time Elapsed: 926.157 s. Mean Reward: -94.175. Std of Reward: 72.475. Training.
+[INFO] DynamicONA. Step: 7780000. Time Elapsed: 956.928 s. Mean Reward: -93.209. Std of Reward: 84.551. Training.
+[INFO] DynamicONA. Step: 7790000. Time Elapsed: 987.995 s. Mean Reward: -96.125. Std of Reward: 78.193. Training.
+[INFO] DynamicONA. Step: 7800000. Time Elapsed: 1018.155 s. Mean Reward: -78.836. Std of Reward: 53.022. Training.
+[INFO] DynamicONA. Step: 7810000. Time Elapsed: 1049.972 s. Mean Reward: -77.935. Std of Reward: 54.611. Training.
+[INFO] DynamicONA. Step: 7820000. Time Elapsed: 1080.361 s. Mean Reward: -95.841. Std of Reward: 80.199. Training.
+[INFO] DynamicONA. Step: 7830000. Time Elapsed: 1112.767 s. Mean Reward: -86.384. Std of Reward: 65.685. Training.
+[INFO] DynamicONA. Step: 7840000. Time Elapsed: 1142.827 s. Mean Reward: -90.182. Std of Reward: 81.283. Training.
+[INFO] DynamicONA. Step: 7850000. Time Elapsed: 1174.651 s. Mean Reward: -95.711. Std of Reward: 154.242. Training.
+[INFO] DynamicONA. Step: 7860000. Time Elapsed: 1205.749 s. Mean Reward: -84.384. Std of Reward: 73.841. Training.
+[INFO] DynamicONA. Step: 7870000. Time Elapsed: 1237.480 s. Mean Reward: -94.517. Std of Reward: 79.681. Training.
+[INFO] DynamicONA. Step: 7880000. Time Elapsed: 1266.789 s. Mean Reward: -94.263. Std of Reward: 90.605. Training.
+[INFO] DynamicONA. Step: 7890000. Time Elapsed: 1297.985 s. Mean Reward: -99.468. Std of Reward: 99.042. Training.
+[INFO] DynamicONA. Step: 7900000. Time Elapsed: 1328.071 s. Mean Reward: -94.906. Std of Reward: 78.319. Training.
+[INFO] DynamicONA. Step: 7910000. Time Elapsed: 1359.851 s. Mean Reward: -89.835. Std of Reward: 77.331. Training.
+[INFO] DynamicONA. Step: 7920000. Time Elapsed: 1392.772 s. Mean Reward: -84.946. Std of Reward: 72.376. Training.
+[INFO] DynamicONA. Step: 7930000. Time Elapsed: 1424.009 s. Mean Reward: -86.480. Std of Reward: 77.345. Training.
+[INFO] DynamicONA. Step: 7940000. Time Elapsed: 1453.003 s. Mean Reward: -82.640. Std of Reward: 69.542. Training.
+[INFO] DynamicONA. Step: 7950000. Time Elapsed: 1485.931 s. Mean Reward: -81.558. Std of Reward: 66.036. Training.
+[INFO] DynamicONA. Step: 7960000. Time Elapsed: 1515.581 s. Mean Reward: -76.191. Std of Reward: 44.677. Training.
+[INFO] DynamicONA. Step: 7970000. Time Elapsed: 1542.998 s. Mean Reward: -85.814. Std of Reward: 74.128. Training.
+[INFO] DynamicONA. Step: 7980000. Time Elapsed: 1567.881 s. Mean Reward: -78.086. Std of Reward: 57.480. Training.
+[INFO] DynamicONA. Step: 7990000. Time Elapsed: 1594.837 s. Mean Reward: -83.217. Std of Reward: 81.949. Training.
+[INFO] DynamicONA. Step: 8000000. Time Elapsed: 1620.382 s. Mean Reward: -86.648. Std of Reward: 71.604. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-7999995.onnx
+[INFO] DynamicONA. Step: 8010000. Time Elapsed: 1648.180 s. Mean Reward: -83.160. Std of Reward: 67.716. Training.
+[INFO] DynamicONA. Step: 8020000. Time Elapsed: 1673.123 s. Mean Reward: -99.334. Std of Reward: 117.116. Training.
+[INFO] DynamicONA. Step: 8030000. Time Elapsed: 1703.346 s. Mean Reward: -85.861. Std of Reward: 58.842. Training.
+[INFO] DynamicONA. Step: 8040000. Time Elapsed: 1734.733 s. Mean Reward: -76.832. Std of Reward: 51.881. Training.
+[INFO] DynamicONA. Step: 8050000. Time Elapsed: 1766.567 s. Mean Reward: -89.705. Std of Reward: 78.999. Training.
+[INFO] DynamicONA. Step: 8060000. Time Elapsed: 1797.696 s. Mean Reward: -76.515. Std of Reward: 61.765. Training.
+[INFO] DynamicONA. Step: 8070000. Time Elapsed: 1829.947 s. Mean Reward: -89.129. Std of Reward: 103.345. Training.
+[INFO] DynamicONA. Step: 8080000. Time Elapsed: 1860.257 s. Mean Reward: -73.406. Std of Reward: 56.678. Training.
+[INFO] DynamicONA. Step: 8090000. Time Elapsed: 1891.155 s. Mean Reward: -78.150. Std of Reward: 54.245. Training.
+[INFO] DynamicONA. Step: 8100000. Time Elapsed: 1919.440 s. Mean Reward: -81.335. Std of Reward: 65.131. Training.
+[INFO] DynamicONA. Step: 8110000. Time Elapsed: 1950.945 s. Mean Reward: -75.543. Std of Reward: 60.043. Training.
+[INFO] DynamicONA. Step: 8120000. Time Elapsed: 1981.412 s. Mean Reward: -73.394. Std of Reward: 62.435. Training.
+[INFO] DynamicONA. Step: 8130000. Time Elapsed: 2012.583 s. Mean Reward: -79.557. Std of Reward: 76.091. Training.
+[INFO] DynamicONA. Step: 8140000. Time Elapsed: 2042.701 s. Mean Reward: -78.332. Std of Reward: 54.410. Training.
+[INFO] DynamicONA. Step: 8150000. Time Elapsed: 2072.683 s. Mean Reward: -87.719. Std of Reward: 94.675. Training.
+[INFO] DynamicONA. Step: 8160000. Time Elapsed: 2106.282 s. Mean Reward: -75.717. Std of Reward: 59.884. Training.
+[INFO] DynamicONA. Step: 8170000. Time Elapsed: 2135.571 s. Mean Reward: -66.509. Std of Reward: 35.915. Training.
+[INFO] DynamicONA. Step: 8180000. Time Elapsed: 2168.484 s. Mean Reward: -80.743. Std of Reward: 66.822. Training.
+[INFO] DynamicONA. Step: 8190000. Time Elapsed: 2198.569 s. Mean Reward: -82.610. Std of Reward: 78.518. Training.
+[INFO] DynamicONA. Step: 8200000. Time Elapsed: 2230.386 s. Mean Reward: -79.746. Std of Reward: 74.045. Training.
+[INFO] DynamicONA. Step: 8210000. Time Elapsed: 2261.091 s. Mean Reward: -75.635. Std of Reward: 61.472. Training.
+[INFO] DynamicONA. Step: 8220000. Time Elapsed: 2293.180 s. Mean Reward: -75.999. Std of Reward: 69.314. Training.
+[INFO] DynamicONA. Step: 8230000. Time Elapsed: 2324.405 s. Mean Reward: -81.964. Std of Reward: 86.716. Training.
+[INFO] DynamicONA. Step: 8240000. Time Elapsed: 2356.458 s. Mean Reward: -85.085. Std of Reward: 105.157. Training.
+[INFO] DynamicONA. Step: 8250000. Time Elapsed: 2386.041 s. Mean Reward: -75.281. Std of Reward: 61.994. Training.
+[INFO] DynamicONA. Step: 8260000. Time Elapsed: 2418.405 s. Mean Reward: -82.147. Std of Reward: 100.208. Training.
+[INFO] DynamicONA. Step: 8270000. Time Elapsed: 2450.992 s. Mean Reward: -71.582. Std of Reward: 52.435. Training.
+[INFO] DynamicONA. Step: 8280000. Time Elapsed: 2482.952 s. Mean Reward: -81.196. Std of Reward: 85.704. Training.
+[INFO] DynamicONA. Step: 8290000. Time Elapsed: 2513.284 s. Mean Reward: -73.341. Std of Reward: 74.982. Training.
+[INFO] DynamicONA. Step: 8300000. Time Elapsed: 2544.123 s. Mean Reward: -84.157. Std of Reward: 67.586. Training.
+[INFO] DynamicONA. Step: 8310000. Time Elapsed: 2573.100 s. Mean Reward: -74.511. Std of Reward: 57.607. Training.
+[INFO] DynamicONA. Step: 8320000. Time Elapsed: 2605.759 s. Mean Reward: -72.752. Std of Reward: 89.393. Training.
+[INFO] DynamicONA. Step: 8330000. Time Elapsed: 2635.629 s. Mean Reward: -78.684. Std of Reward: 70.244. Training.
+[INFO] DynamicONA. Step: 8340000. Time Elapsed: 2666.957 s. Mean Reward: -77.157. Std of Reward: 74.044. Training.
+[INFO] DynamicONA. Step: 8350000. Time Elapsed: 2697.304 s. Mean Reward: -69.924. Std of Reward: 58.175. Training.
+[INFO] DynamicONA. Step: 8360000. Time Elapsed: 2729.317 s. Mean Reward: -81.370. Std of Reward: 87.305. Training.
+[INFO] DynamicONA. Step: 8370000. Time Elapsed: 2758.888 s. Mean Reward: -76.409. Std of Reward: 54.826. Training.
+[INFO] DynamicONA. Step: 8380000. Time Elapsed: 2791.306 s. Mean Reward: -73.365. Std of Reward: 57.538. Training.
+[INFO] DynamicONA. Step: 8390000. Time Elapsed: 2821.399 s. Mean Reward: -81.355. Std of Reward: 68.784. Training.
+[INFO] DynamicONA. Step: 8400000. Time Elapsed: 2852.796 s. Mean Reward: -81.060. Std of Reward: 75.462. Training.
+[INFO] DynamicONA. Step: 8410000. Time Elapsed: 2882.830 s. Mean Reward: -68.862. Std of Reward: 44.154. Training.
+[INFO] DynamicONA. Step: 8420000. Time Elapsed: 2914.462 s. Mean Reward: -71.068. Std of Reward: 45.786. Training.
+[INFO] DynamicONA. Step: 8430000. Time Elapsed: 2943.175 s. Mean Reward: -67.462. Std of Reward: 43.676. Training.
+[INFO] DynamicONA. Step: 8440000. Time Elapsed: 2975.671 s. Mean Reward: -66.555. Std of Reward: 40.880. Training.
+[INFO] DynamicONA. Step: 8450000. Time Elapsed: 3005.571 s. Mean Reward: -66.536. Std of Reward: 44.707. Training.
+[INFO] DynamicONA. Step: 8460000. Time Elapsed: 3035.824 s. Mean Reward: -82.761. Std of Reward: 89.558. Training.
+[INFO] DynamicONA. Step: 8470000. Time Elapsed: 3066.410 s. Mean Reward: -72.265. Std of Reward: 63.921. Training.
+[INFO] DynamicONA. Step: 8480000. Time Elapsed: 3097.177 s. Mean Reward: -80.397. Std of Reward: 100.250. Training.
+[INFO] DynamicONA. Step: 8490000. Time Elapsed: 3128.838 s. Mean Reward: -60.436. Std of Reward: 37.473. Training.
+[INFO] DynamicONA. Step: 8500000. Time Elapsed: 3161.016 s. Mean Reward: -74.386. Std of Reward: 56.666. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-8499979.onnx
+[INFO] DynamicONA. Step: 8510000. Time Elapsed: 3190.108 s. Mean Reward: -77.477. Std of Reward: 102.158. Training.
+[INFO] DynamicONA. Step: 8520000. Time Elapsed: 3220.143 s. Mean Reward: -71.743. Std of Reward: 63.123. Training.
+[INFO] DynamicONA. Step: 8530000. Time Elapsed: 3248.787 s. Mean Reward: -67.107. Std of Reward: 49.750. Training.
+[INFO] DynamicONA. Step: 8540000. Time Elapsed: 3277.313 s. Mean Reward: -68.752. Std of Reward: 54.171. Training.
+[INFO] DynamicONA. Step: 8550000. Time Elapsed: 3310.451 s. Mean Reward: -73.776. Std of Reward: 65.490. Training.
+[INFO] DynamicONA. Step: 8560000. Time Elapsed: 3338.525 s. Mean Reward: -78.335. Std of Reward: 91.150. Training.
+[INFO] DynamicONA. Step: 8570000. Time Elapsed: 3370.283 s. Mean Reward: -78.623. Std of Reward: 89.318. Training.
+[INFO] DynamicONA. Step: 8580000. Time Elapsed: 3400.097 s. Mean Reward: -66.220. Std of Reward: 66.138. Training.
+[INFO] DynamicONA. Step: 8590000. Time Elapsed: 3431.710 s. Mean Reward: -67.822. Std of Reward: 93.773. Training.
+[INFO] DynamicONA. Step: 8600000. Time Elapsed: 3461.760 s. Mean Reward: -72.563. Std of Reward: 72.681. Training.
+[INFO] DynamicONA. Step: 8610000. Time Elapsed: 3494.667 s. Mean Reward: -71.792. Std of Reward: 60.398. Training.
+[INFO] DynamicONA. Step: 8620000. Time Elapsed: 3524.313 s. Mean Reward: -62.267. Std of Reward: 36.572. Training.
+[INFO] DynamicONA. Step: 8630000. Time Elapsed: 3556.420 s. Mean Reward: -67.668. Std of Reward: 47.235. Training.
+[INFO] DynamicONA. Step: 8640000. Time Elapsed: 3585.629 s. Mean Reward: -82.000. Std of Reward: 85.496. Training.
+[INFO] DynamicONA. Step: 8650000. Time Elapsed: 3618.808 s. Mean Reward: -65.822. Std of Reward: 43.706. Training.
+[INFO] DynamicONA. Step: 8660000. Time Elapsed: 3648.710 s. Mean Reward: -65.937. Std of Reward: 69.664. Training.
+[INFO] DynamicONA. Step: 8670000. Time Elapsed: 3681.629 s. Mean Reward: -75.525. Std of Reward: 68.557. Training.
+[INFO] DynamicONA. Step: 8680000. Time Elapsed: 3712.440 s. Mean Reward: -62.408. Std of Reward: 37.419. Training.
+[INFO] DynamicONA. Step: 8690000. Time Elapsed: 3744.785 s. Mean Reward: -67.587. Std of Reward: 65.313. Training.
+[INFO] DynamicONA. Step: 8700000. Time Elapsed: 3773.461 s. Mean Reward: -71.078. Std of Reward: 65.103. Training.
+[INFO] DynamicONA. Step: 8710000. Time Elapsed: 3807.208 s. Mean Reward: -64.841. Std of Reward: 50.573. Training.
+[INFO] DynamicONA. Step: 8720000. Time Elapsed: 3835.239 s. Mean Reward: -78.977. Std of Reward: 78.244. Training.
+[INFO] DynamicONA. Step: 8730000. Time Elapsed: 3867.524 s. Mean Reward: -70.053. Std of Reward: 73.449. Training.
+[INFO] DynamicONA. Step: 8740000. Time Elapsed: 3893.397 s. Mean Reward: -63.389. Std of Reward: 49.550. Training.
+[INFO] DynamicONA. Step: 8750000. Time Elapsed: 3921.340 s. Mean Reward: -67.472. Std of Reward: 51.746. Training.
+[INFO] DynamicONA. Step: 8760000. Time Elapsed: 3945.956 s. Mean Reward: -58.457. Std of Reward: 35.249. Training.
+[INFO] DynamicONA. Step: 8770000. Time Elapsed: 3974.137 s. Mean Reward: -68.583. Std of Reward: 69.240. Training.
+[INFO] DynamicONA. Step: 8780000. Time Elapsed: 3998.726 s. Mean Reward: -62.888. Std of Reward: 47.197. Training.
+[INFO] DynamicONA. Step: 8790000. Time Elapsed: 4026.828 s. Mean Reward: -69.803. Std of Reward: 58.187. Training.
+[INFO] DynamicONA. Step: 8800000. Time Elapsed: 4051.361 s. Mean Reward: -70.640. Std of Reward: 74.225. Training.
+[INFO] DynamicONA. Step: 8810000. Time Elapsed: 4078.549 s. Mean Reward: -71.524. Std of Reward: 68.593. Training.
+[INFO] DynamicONA. Step: 8820000. Time Elapsed: 4103.329 s. Mean Reward: -62.956. Std of Reward: 36.346. Training.
+[INFO] DynamicONA. Step: 8830000. Time Elapsed: 4131.280 s. Mean Reward: -71.485. Std of Reward: 78.752. Training.
+[INFO] DynamicONA. Step: 8840000. Time Elapsed: 4156.727 s. Mean Reward: -53.314. Std of Reward: 40.265. Training.
+[INFO] DynamicONA. Step: 8850000. Time Elapsed: 4184.693 s. Mean Reward: -65.966. Std of Reward: 57.818. Training.
+[INFO] DynamicONA. Step: 8860000. Time Elapsed: 4209.809 s. Mean Reward: -69.694. Std of Reward: 57.214. Training.
+[INFO] DynamicONA. Step: 8870000. Time Elapsed: 4240.796 s. Mean Reward: -71.337. Std of Reward: 87.639. Training.
+[INFO] DynamicONA. Step: 8880000. Time Elapsed: 4270.039 s. Mean Reward: -63.395. Std of Reward: 47.556. Training.
+[INFO] DynamicONA. Step: 8890000. Time Elapsed: 4302.673 s. Mean Reward: -61.624. Std of Reward: 40.425. Training.
+[INFO] DynamicONA. Step: 8900000. Time Elapsed: 4332.052 s. Mean Reward: -65.581. Std of Reward: 67.878. Training.
+[INFO] DynamicONA. Step: 8910000. Time Elapsed: 4365.028 s. Mean Reward: -60.861. Std of Reward: 54.895. Training.
+[INFO] DynamicONA. Step: 8920000. Time Elapsed: 4396.451 s. Mean Reward: -65.213. Std of Reward: 89.989. Training.
+[INFO] DynamicONA. Step: 8930000. Time Elapsed: 4427.032 s. Mean Reward: -64.797. Std of Reward: 60.902. Training.
+[INFO] DynamicONA. Step: 8940000. Time Elapsed: 4458.149 s. Mean Reward: -77.383. Std of Reward: 142.399. Training.
+[INFO] DynamicONA. Step: 8950000. Time Elapsed: 4487.059 s. Mean Reward: -63.100. Std of Reward: 49.286. Training.
+[INFO] DynamicONA. Step: 8960000. Time Elapsed: 4519.839 s. Mean Reward: -64.616. Std of Reward: 62.767. Training.
+[INFO] DynamicONA. Step: 8970000. Time Elapsed: 4550.119 s. Mean Reward: -59.674. Std of Reward: 46.226. Training.
+[INFO] DynamicONA. Step: 8980000. Time Elapsed: 4584.201 s. Mean Reward: -63.954. Std of Reward: 40.852. Training.
+[INFO] DynamicONA. Step: 8990000. Time Elapsed: 4611.940 s. Mean Reward: -76.773. Std of Reward: 114.443. Training.
+[INFO] DynamicONA. Step: 9000000. Time Elapsed: 4643.751 s. Mean Reward: -54.737. Std of Reward: 38.387. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-8999965.onnx
+[INFO] DynamicONA. Step: 9010000. Time Elapsed: 4673.158 s. Mean Reward: -58.229. Std of Reward: 48.491. Training.
+[INFO] DynamicONA. Step: 9020000. Time Elapsed: 4705.724 s. Mean Reward: -61.517. Std of Reward: 47.300. Training.
+[INFO] DynamicONA. Step: 9030000. Time Elapsed: 4735.043 s. Mean Reward: -64.038. Std of Reward: 74.929. Training.
+[INFO] DynamicONA. Step: 9040000. Time Elapsed: 4766.183 s. Mean Reward: -68.205. Std of Reward: 83.389. Training.
+[INFO] DynamicONA. Step: 9050000. Time Elapsed: 4798.024 s. Mean Reward: -62.385. Std of Reward: 55.752. Training.
+[INFO] DynamicONA. Step: 9060000. Time Elapsed: 4831.418 s. Mean Reward: -69.400. Std of Reward: 91.061. Training.
+[INFO] DynamicONA. Step: 9070000. Time Elapsed: 4862.942 s. Mean Reward: -54.725. Std of Reward: 33.502. Training.
+[INFO] DynamicONA. Step: 9080000. Time Elapsed: 4895.991 s. Mean Reward: -62.700. Std of Reward: 59.299. Training.
+[INFO] DynamicONA. Step: 9090000. Time Elapsed: 4927.848 s. Mean Reward: -71.209. Std of Reward: 107.079. Training.
+[INFO] DynamicONA. Step: 9100000. Time Elapsed: 4960.113 s. Mean Reward: -71.265. Std of Reward: 88.287. Training.
+[INFO] DynamicONA. Step: 9110000. Time Elapsed: 4990.488 s. Mean Reward: -68.837. Std of Reward: 65.090. Training.
+[INFO] DynamicONA. Step: 9120000. Time Elapsed: 5024.096 s. Mean Reward: -64.617. Std of Reward: 50.506. Training.
+[INFO] DynamicONA. Step: 9130000. Time Elapsed: 5053.905 s. Mean Reward: -54.891. Std of Reward: 36.653. Training.
+[INFO] DynamicONA. Step: 9140000. Time Elapsed: 5086.966 s. Mean Reward: -62.510. Std of Reward: 60.985. Training.
+[INFO] DynamicONA. Step: 9150000. Time Elapsed: 5116.319 s. Mean Reward: -64.049. Std of Reward: 69.569. Training.
+[INFO] DynamicONA. Step: 9160000. Time Elapsed: 5148.445 s. Mean Reward: -62.984. Std of Reward: 60.917. Training.
+[INFO] DynamicONA. Step: 9170000. Time Elapsed: 5176.550 s. Mean Reward: -63.985. Std of Reward: 71.675. Training.
+[INFO] DynamicONA. Step: 9180000. Time Elapsed: 5209.643 s. Mean Reward: -61.776. Std of Reward: 60.355. Training.
+[INFO] DynamicONA. Step: 9190000. Time Elapsed: 5238.529 s. Mean Reward: -63.416. Std of Reward: 89.719. Training.
+[INFO] DynamicONA. Step: 9200000. Time Elapsed: 5270.334 s. Mean Reward: -57.415. Std of Reward: 38.590. Training.
+[INFO] DynamicONA. Step: 9210000. Time Elapsed: 5301.235 s. Mean Reward: -59.587. Std of Reward: 44.497. Training.
+[INFO] DynamicONA. Step: 9220000. Time Elapsed: 5333.358 s. Mean Reward: -59.009. Std of Reward: 55.634. Training.
+[INFO] DynamicONA. Step: 9230000. Time Elapsed: 5362.886 s. Mean Reward: -64.482. Std of Reward: 77.825. Training.
+[INFO] DynamicONA. Step: 9240000. Time Elapsed: 5394.613 s. Mean Reward: -55.444. Std of Reward: 38.090. Training.
+[INFO] DynamicONA. Step: 9250000. Time Elapsed: 5424.347 s. Mean Reward: -57.032. Std of Reward: 49.082. Training.
+[INFO] DynamicONA. Step: 9260000. Time Elapsed: 5455.763 s. Mean Reward: -74.410. Std of Reward: 114.598. Training.
+[INFO] DynamicONA. Step: 9270000. Time Elapsed: 5485.521 s. Mean Reward: -64.663. Std of Reward: 68.910. Training.
+[INFO] DynamicONA. Step: 9280000. Time Elapsed: 5518.776 s. Mean Reward: -54.945. Std of Reward: 82.541. Training.
+[INFO] DynamicONA. Step: 9290000. Time Elapsed: 5544.628 s. Mean Reward: -60.752. Std of Reward: 73.633. Training.
+[INFO] DynamicONA. Step: 9300000. Time Elapsed: 5571.629 s. Mean Reward: -63.665. Std of Reward: 70.357. Training.
+[INFO] DynamicONA. Step: 9310000. Time Elapsed: 5597.024 s. Mean Reward: -51.288. Std of Reward: 31.713. Training.
+[INFO] DynamicONA. Step: 9320000. Time Elapsed: 5622.219 s. Mean Reward: -59.387. Std of Reward: 69.075. Training.
+[INFO] DynamicONA. Step: 9330000. Time Elapsed: 5649.288 s. Mean Reward: -66.298. Std of Reward: 71.674. Training.
+[INFO] DynamicONA. Step: 9340000. Time Elapsed: 5675.280 s. Mean Reward: -61.409. Std of Reward: 76.713. Training.
+[INFO] DynamicONA. Step: 9350000. Time Elapsed: 5706.722 s. Mean Reward: -58.968. Std of Reward: 67.227. Training.
+[INFO] DynamicONA. Step: 9360000. Time Elapsed: 5736.490 s. Mean Reward: -68.048. Std of Reward: 109.275. Training.
+[INFO] DynamicONA. Step: 9370000. Time Elapsed: 5769.732 s. Mean Reward: -57.931. Std of Reward: 49.385. Training.
+[INFO] DynamicONA. Step: 9380000. Time Elapsed: 5799.353 s. Mean Reward: -60.027. Std of Reward: 94.565. Training.
+[INFO] DynamicONA. Step: 9390000. Time Elapsed: 5830.804 s. Mean Reward: -60.755. Std of Reward: 59.385. Training.
+[INFO] DynamicONA. Step: 9400000. Time Elapsed: 5861.376 s. Mean Reward: -76.301. Std of Reward: 136.996. Training.
+[INFO] DynamicONA. Step: 9410000. Time Elapsed: 5893.590 s. Mean Reward: -65.105. Std of Reward: 75.231. Training.
+[INFO] DynamicONA. Step: 9420000. Time Elapsed: 5924.501 s. Mean Reward: -57.167. Std of Reward: 49.167. Training.
+[INFO] DynamicONA. Step: 9430000. Time Elapsed: 5957.365 s. Mean Reward: -57.368. Std of Reward: 45.637. Training.
+[INFO] DynamicONA. Step: 9440000. Time Elapsed: 5988.071 s. Mean Reward: -54.458. Std of Reward: 40.293. Training.
+[INFO] DynamicONA. Step: 9450000. Time Elapsed: 6024.902 s. Mean Reward: -49.297. Std of Reward: 32.103. Training.
+[INFO] DynamicONA. Step: 9460000. Time Elapsed: 6057.471 s. Mean Reward: -54.854. Std of Reward: 50.558. Training.
+[INFO] DynamicONA. Step: 9470000. Time Elapsed: 6095.987 s. Mean Reward: -65.719. Std of Reward: 90.992. Training.
+[INFO] DynamicONA. Step: 9480000. Time Elapsed: 6127.560 s. Mean Reward: -70.776. Std of Reward: 110.392. Training.
+[INFO] DynamicONA. Step: 9490000. Time Elapsed: 6163.388 s. Mean Reward: -62.499. Std of Reward: 68.052. Training.
+[INFO] DynamicONA. Step: 9500000. Time Elapsed: 6197.358 s. Mean Reward: -61.831. Std of Reward: 74.095. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-9499993.onnx
+[INFO] DynamicONA. Step: 9510000. Time Elapsed: 6235.182 s. Mean Reward: -58.810. Std of Reward: 84.613. Training.
+[INFO] DynamicONA. Step: 9520000. Time Elapsed: 6268.289 s. Mean Reward: -56.215. Std of Reward: 54.564. Training.
+[INFO] DynamicONA. Step: 9530000. Time Elapsed: 6304.706 s. Mean Reward: -58.564. Std of Reward: 60.424. Training.
+[INFO] DynamicONA. Step: 9540000. Time Elapsed: 6339.896 s. Mean Reward: -68.251. Std of Reward: 94.503. Training.
+[INFO] DynamicONA. Step: 9550000. Time Elapsed: 6377.493 s. Mean Reward: -58.853. Std of Reward: 58.956. Training.
+[INFO] DynamicONA. Step: 9560000. Time Elapsed: 6412.879 s. Mean Reward: -57.418. Std of Reward: 58.094. Training.
+[INFO] DynamicONA. Step: 9570000. Time Elapsed: 6450.098 s. Mean Reward: -54.296. Std of Reward: 54.702. Training.
+[INFO] DynamicONA. Step: 9580000. Time Elapsed: 6484.296 s. Mean Reward: -54.137. Std of Reward: 45.579. Training.
+[INFO] DynamicONA. Step: 9590000. Time Elapsed: 6521.244 s. Mean Reward: -59.279. Std of Reward: 76.209. Training.
+[INFO] DynamicONA. Step: 9600000. Time Elapsed: 6555.845 s. Mean Reward: -52.896. Std of Reward: 43.207. Training.
+[INFO] DynamicONA. Step: 9610000. Time Elapsed: 6593.514 s. Mean Reward: -57.706. Std of Reward: 71.429. Training.
+[INFO] DynamicONA. Step: 9620000. Time Elapsed: 6627.696 s. Mean Reward: -53.089. Std of Reward: 45.171. Training.
+[INFO] DynamicONA. Step: 9630000. Time Elapsed: 6667.792 s. Mean Reward: -48.842. Std of Reward: 53.226. Training.
+[INFO] DynamicONA. Step: 9640000. Time Elapsed: 6702.705 s. Mean Reward: -72.589. Std of Reward: 123.978. Training.
+[INFO] DynamicONA. Step: 9650000. Time Elapsed: 6740.626 s. Mean Reward: -61.914. Std of Reward: 103.373. Training.
+[INFO] DynamicONA. Step: 9660000. Time Elapsed: 6774.975 s. Mean Reward: -71.970. Std of Reward: 157.420. Training.
+[INFO] DynamicONA. Step: 9670000. Time Elapsed: 6812.906 s. Mean Reward: -52.356. Std of Reward: 56.320. Training.
+[INFO] DynamicONA. Step: 9680000. Time Elapsed: 6845.502 s. Mean Reward: -59.186. Std of Reward: 73.702. Training.
+[INFO] DynamicONA. Step: 9690000. Time Elapsed: 6882.078 s. Mean Reward: -50.650. Std of Reward: 39.342. Training.
+[INFO] DynamicONA. Step: 9700000. Time Elapsed: 6914.480 s. Mean Reward: -55.701. Std of Reward: 51.544. Training.
+[INFO] DynamicONA. Step: 9710000. Time Elapsed: 6946.802 s. Mean Reward: -57.698. Std of Reward: 68.339. Training.
+[INFO] DynamicONA. Step: 9720000. Time Elapsed: 6983.856 s. Mean Reward: -61.375. Std of Reward: 71.458. Training.
+[INFO] DynamicONA. Step: 9730000. Time Elapsed: 7015.888 s. Mean Reward: -60.228. Std of Reward: 152.301. Training.
+[INFO] DynamicONA. Step: 9740000. Time Elapsed: 7055.338 s. Mean Reward: -47.893. Std of Reward: 32.400. Training.
+[INFO] DynamicONA. Step: 9750000. Time Elapsed: 7089.301 s. Mean Reward: -48.585. Std of Reward: 43.224. Training.
+[INFO] DynamicONA. Step: 9760000. Time Elapsed: 7125.622 s. Mean Reward: -55.020. Std of Reward: 65.817. Training.
+[INFO] DynamicONA. Step: 9770000. Time Elapsed: 7159.600 s. Mean Reward: -54.791. Std of Reward: 56.309. Training.
+[INFO] DynamicONA. Step: 9780000. Time Elapsed: 7195.671 s. Mean Reward: -59.547. Std of Reward: 68.731. Training.
+[INFO] DynamicONA. Step: 9790000. Time Elapsed: 7230.528 s. Mean Reward: -54.401. Std of Reward: 51.424. Training.
+[INFO] DynamicONA. Step: 9800000. Time Elapsed: 7267.895 s. Mean Reward: -66.369. Std of Reward: 125.935. Training.
+[INFO] DynamicONA. Step: 9810000. Time Elapsed: 7302.290 s. Mean Reward: -59.531. Std of Reward: 64.866. Training.
+[INFO] DynamicONA. Step: 9820000. Time Elapsed: 7339.695 s. Mean Reward: -56.105. Std of Reward: 95.451. Training.
+[INFO] DynamicONA. Step: 9830000. Time Elapsed: 7375.344 s. Mean Reward: -59.095. Std of Reward: 91.281. Training.
+[INFO] DynamicONA. Step: 9840000. Time Elapsed: 7412.732 s. Mean Reward: -65.751. Std of Reward: 84.367. Training.
+[INFO] DynamicONA. Step: 9850000. Time Elapsed: 7445.723 s. Mean Reward: -50.191. Std of Reward: 39.635. Training.
+[INFO] DynamicONA. Step: 9860000. Time Elapsed: 7480.968 s. Mean Reward: -49.554. Std of Reward: 44.471. Training.
+[INFO] DynamicONA. Step: 9870000. Time Elapsed: 7516.288 s. Mean Reward: -62.358. Std of Reward: 81.421. Training.
+[INFO] DynamicONA. Step: 9880000. Time Elapsed: 7566.951 s. Mean Reward: -57.697. Std of Reward: 57.041. Training.
+[INFO] DynamicONA. Step: 9890000. Time Elapsed: 7604.838 s. Mean Reward: -51.014. Std of Reward: 52.311. Training.
+[INFO] DynamicONA. Step: 9900000. Time Elapsed: 7644.706 s. Mean Reward: -50.192. Std of Reward: 57.118. Training.
+[INFO] DynamicONA. Step: 9910000. Time Elapsed: 7680.973 s. Mean Reward: -54.455. Std of Reward: 68.710. Training.
+[INFO] DynamicONA. Step: 9920000. Time Elapsed: 7722.560 s. Mean Reward: -64.016. Std of Reward: 81.241. Training.
+[INFO] DynamicONA. Step: 9930000. Time Elapsed: 7762.623 s. Mean Reward: -52.221. Std of Reward: 43.884. Training.
+[INFO] DynamicONA. Step: 9940000. Time Elapsed: 7803.200 s. Mean Reward: -47.226. Std of Reward: 43.209. Training.
+[INFO] DynamicONA. Step: 9950000. Time Elapsed: 7839.509 s. Mean Reward: -54.920. Std of Reward: 78.596. Training.
+[INFO] DynamicONA. Step: 9960000. Time Elapsed: 7877.916 s. Mean Reward: -57.404. Std of Reward: 64.525. Training.
+[INFO] DynamicONA. Step: 9970000. Time Elapsed: 7914.144 s. Mean Reward: -55.596. Std of Reward: 64.279. Training.
+[INFO] DynamicONA. Step: 9980000. Time Elapsed: 7952.467 s. Mean Reward: -52.980. Std of Reward: 56.992. Training.
+[INFO] DynamicONA. Step: 9990000. Time Elapsed: 7987.524 s. Mean Reward: -59.492. Std of Reward: 72.087. Training.
+[INFO] DynamicONA. Step: 10000000. Time Elapsed: 8024.796 s. Mean Reward: -60.847. Std of Reward: 132.802. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-9999925.onnx
+[INFO] DynamicONA. Step: 10010000. Time Elapsed: 8060.939 s. Mean Reward: -52.313. Std of Reward: 62.007. Training.
+[INFO] DynamicONA. Step: 10020000. Time Elapsed: 8100.956 s. Mean Reward: -54.723. Std of Reward: 81.875. Training.
+[INFO] DynamicONA. Step: 10030000. Time Elapsed: 8133.829 s. Mean Reward: -57.708. Std of Reward: 84.496. Training.
+[INFO] DynamicONA. Step: 10040000. Time Elapsed: 8172.480 s. Mean Reward: -61.382. Std of Reward: 88.288. Training.
+[INFO] DynamicONA. Step: 10050000. Time Elapsed: 8208.151 s. Mean Reward: -53.902. Std of Reward: 65.534. Training.
+[INFO] DynamicONA. Step: 10060000. Time Elapsed: 8245.576 s. Mean Reward: -49.024. Std of Reward: 66.670. Training.
+[INFO] DynamicONA. Step: 10070000. Time Elapsed: 8280.145 s. Mean Reward: -54.556. Std of Reward: 54.054. Training.
+[INFO] DynamicONA. Step: 10080000. Time Elapsed: 8319.257 s. Mean Reward: -44.211. Std of Reward: 44.786. Training.
+[INFO] DynamicONA. Step: 10090000. Time Elapsed: 8354.999 s. Mean Reward: -57.117. Std of Reward: 80.534. Training.
+[INFO] DynamicONA. Step: 10100000. Time Elapsed: 8393.659 s. Mean Reward: -54.469. Std of Reward: 81.439. Training.
+[INFO] DynamicONA. Step: 10110000. Time Elapsed: 8428.825 s. Mean Reward: -57.374. Std of Reward: 69.760. Training.
+[INFO] DynamicONA. Step: 10120000. Time Elapsed: 8464.337 s. Mean Reward: -57.274. Std of Reward: 73.485. Training.
+[INFO] DynamicONA. Step: 10130000. Time Elapsed: 8503.556 s. Mean Reward: -48.753. Std of Reward: 40.964. Training.
+[INFO] DynamicONA. Step: 10140000. Time Elapsed: 8540.680 s. Mean Reward: -47.348. Std of Reward: 44.040. Training.
+[INFO] DynamicONA. Step: 10150000. Time Elapsed: 8578.025 s. Mean Reward: -58.144. Std of Reward: 75.717. Training.
+[INFO] DynamicONA. Step: 10160000. Time Elapsed: 8615.839 s. Mean Reward: -46.646. Std of Reward: 34.041. Training.
+[INFO] DynamicONA. Step: 10170000. Time Elapsed: 8649.748 s. Mean Reward: -52.119. Std of Reward: 51.861. Training.
+[INFO] DynamicONA. Step: 10180000. Time Elapsed: 8676.770 s. Mean Reward: -51.316. Std of Reward: 83.801. Training.
+[INFO] DynamicONA. Step: 10190000. Time Elapsed: 8705.489 s. Mean Reward: -51.241. Std of Reward: 47.234. Training.
+[INFO] DynamicONA. Step: 10200000. Time Elapsed: 8731.206 s. Mean Reward: -45.483. Std of Reward: 42.727. Training.
+[INFO] DynamicONA. Step: 10210000. Time Elapsed: 8760.073 s. Mean Reward: -50.526. Std of Reward: 72.095. Training.
+[INFO] DynamicONA. Step: 10220000. Time Elapsed: 8786.512 s. Mean Reward: -59.826. Std of Reward: 100.870. Training.
+[INFO] DynamicONA. Step: 10230000. Time Elapsed: 8815.945 s. Mean Reward: -51.408. Std of Reward: 60.457. Training.
+[INFO] DynamicONA. Step: 10240000. Time Elapsed: 8842.172 s. Mean Reward: -55.791. Std of Reward: 64.636. Training.
+[INFO] DynamicONA. Step: 10250000. Time Elapsed: 8870.276 s. Mean Reward: -54.164. Std of Reward: 71.957. Training.
+[INFO] DynamicONA. Step: 10260000. Time Elapsed: 8897.255 s. Mean Reward: -48.963. Std of Reward: 58.953. Training.
+[INFO] DynamicONA. Step: 10270000. Time Elapsed: 8926.881 s. Mean Reward: -50.252. Std of Reward: 54.266. Training.
+[INFO] DynamicONA. Step: 10280000. Time Elapsed: 8953.832 s. Mean Reward: -48.488. Std of Reward: 47.864. Training.
+[INFO] DynamicONA. Step: 10290000. Time Elapsed: 8984.212 s. Mean Reward: -50.384. Std of Reward: 55.315. Training.
+[INFO] DynamicONA. Step: 10300000. Time Elapsed: 9012.797 s. Mean Reward: -52.985. Std of Reward: 54.037. Training.
+[INFO] DynamicONA. Step: 10310000. Time Elapsed: 9044.222 s. Mean Reward: -47.445. Std of Reward: 42.777. Training.
+[INFO] DynamicONA. Step: 10320000. Time Elapsed: 9072.478 s. Mean Reward: -59.806. Std of Reward: 59.152. Training.
+[INFO] DynamicONA. Step: 10330000. Time Elapsed: 9102.441 s. Mean Reward: -52.732. Std of Reward: 63.971. Training.
+[INFO] DynamicONA. Step: 10340000. Time Elapsed: 9129.453 s. Mean Reward: -42.320. Std of Reward: 32.494. Training.
+[INFO] DynamicONA. Step: 10350000. Time Elapsed: 9158.596 s. Mean Reward: -58.383. Std of Reward: 84.112. Training.
+[INFO] DynamicONA. Step: 10360000. Time Elapsed: 9184.781 s. Mean Reward: -49.761. Std of Reward: 54.490. Training.
+[INFO] DynamicONA. Step: 10370000. Time Elapsed: 9214.857 s. Mean Reward: -46.669. Std of Reward: 49.931. Training.
+[INFO] DynamicONA. Step: 10380000. Time Elapsed: 9241.665 s. Mean Reward: -49.359. Std of Reward: 41.377. Training.
+[INFO] DynamicONA. Step: 10390000. Time Elapsed: 9271.907 s. Mean Reward: -49.347. Std of Reward: 52.065. Training.
+[INFO] DynamicONA. Step: 10400000. Time Elapsed: 9298.294 s. Mean Reward: -46.905. Std of Reward: 45.072. Training.
+[INFO] DynamicONA. Step: 10410000. Time Elapsed: 9327.671 s. Mean Reward: -47.598. Std of Reward: 45.647. Training.
+[INFO] DynamicONA. Step: 10420000. Time Elapsed: 9353.551 s. Mean Reward: -56.248. Std of Reward: 98.990. Training.
+[INFO] DynamicONA. Step: 10430000. Time Elapsed: 9382.827 s. Mean Reward: -51.202. Std of Reward: 67.173. Training.
+[INFO] DynamicONA. Step: 10440000. Time Elapsed: 9409.887 s. Mean Reward: -53.243. Std of Reward: 55.255. Training.
+[INFO] DynamicONA. Step: 10450000. Time Elapsed: 9438.078 s. Mean Reward: -47.378. Std of Reward: 48.053. Training.
+[INFO] DynamicONA. Step: 10460000. Time Elapsed: 9465.284 s. Mean Reward: -46.651. Std of Reward: 74.037. Training.
+[INFO] DynamicONA. Step: 10470000. Time Elapsed: 9494.596 s. Mean Reward: -51.668. Std of Reward: 63.319. Training.
+[INFO] DynamicONA. Step: 10480000. Time Elapsed: 9522.307 s. Mean Reward: -54.598. Std of Reward: 82.158. Training.
+[INFO] DynamicONA. Step: 10490000. Time Elapsed: 9557.386 s. Mean Reward: -49.296. Std of Reward: 47.121. Training.
+[INFO] DynamicONA. Step: 10500000. Time Elapsed: 9589.817 s. Mean Reward: -45.203. Std of Reward: 35.627. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-10499930.onnx
+[INFO] DynamicONA. Step: 10510000. Time Elapsed: 9621.919 s. Mean Reward: -44.949. Std of Reward: 52.031. Training.
+[INFO] DynamicONA. Step: 10520000. Time Elapsed: 9657.133 s. Mean Reward: -46.023. Std of Reward: 54.672. Training.
+[INFO] DynamicONA. Step: 10530000. Time Elapsed: 9689.334 s. Mean Reward: -54.611. Std of Reward: 121.970. Training.
+[INFO] DynamicONA. Step: 10540000. Time Elapsed: 9723.770 s. Mean Reward: -46.704. Std of Reward: 40.047. Training.
+[INFO] DynamicONA. Step: 10550000. Time Elapsed: 9758.507 s. Mean Reward: -49.556. Std of Reward: 65.465. Training.
+[INFO] DynamicONA. Step: 10560000. Time Elapsed: 9791.738 s. Mean Reward: -55.626. Std of Reward: 67.473. Training.
+[INFO] DynamicONA. Step: 10570000. Time Elapsed: 9824.069 s. Mean Reward: -39.989. Std of Reward: 32.882. Training.
+[INFO] DynamicONA. Step: 10580000. Time Elapsed: 9859.212 s. Mean Reward: -44.529. Std of Reward: 35.525. Training.
+[INFO] DynamicONA. Step: 10590000. Time Elapsed: 9889.438 s. Mean Reward: -41.244. Std of Reward: 29.270. Training.
+[INFO] DynamicONA. Step: 10600000. Time Elapsed: 9917.189 s. Mean Reward: -46.533. Std of Reward: 47.588. Training.
+[INFO] DynamicONA. Step: 10610000. Time Elapsed: 9943.101 s. Mean Reward: -41.732. Std of Reward: 31.949. Training.
+[INFO] DynamicONA. Step: 10620000. Time Elapsed: 9971.703 s. Mean Reward: -39.192. Std of Reward: 33.600. Training.
+[INFO] DynamicONA. Step: 10630000. Time Elapsed: 9998.120 s. Mean Reward: -45.472. Std of Reward: 50.458. Training.
+[INFO] DynamicONA. Step: 10640000. Time Elapsed: 10026.700 s. Mean Reward: -59.015. Std of Reward: 99.685. Training.
+[INFO] DynamicONA. Step: 10650000. Time Elapsed: 10052.382 s. Mean Reward: -51.266. Std of Reward: 64.366. Training.
+[INFO] DynamicONA. Step: 10660000. Time Elapsed: 10081.338 s. Mean Reward: -42.931. Std of Reward: 60.704. Training.
+[INFO] DynamicONA. Step: 10670000. Time Elapsed: 10107.682 s. Mean Reward: -42.347. Std of Reward: 40.561. Training.
+[INFO] DynamicONA. Step: 10680000. Time Elapsed: 10138.260 s. Mean Reward: -58.629. Std of Reward: 82.794. Training.
+[INFO] DynamicONA. Step: 10690000. Time Elapsed: 10164.957 s. Mean Reward: -42.269. Std of Reward: 40.262. Training.
+[INFO] DynamicONA. Step: 10700000. Time Elapsed: 10196.420 s. Mean Reward: -46.476. Std of Reward: 42.706. Training.
+[INFO] DynamicONA. Step: 10710000. Time Elapsed: 10223.636 s. Mean Reward: -47.101. Std of Reward: 53.002. Training.
+[INFO] DynamicONA. Step: 10720000. Time Elapsed: 10253.702 s. Mean Reward: -44.878. Std of Reward: 50.092. Training.
+[INFO] DynamicONA. Step: 10730000. Time Elapsed: 10280.904 s. Mean Reward: -43.553. Std of Reward: 42.207. Training.
+[INFO] DynamicONA. Step: 10740000. Time Elapsed: 10311.571 s. Mean Reward: -45.202. Std of Reward: 40.619. Training.
+[INFO] DynamicONA. Step: 10750000. Time Elapsed: 10337.696 s. Mean Reward: -47.068. Std of Reward: 96.011. Training.
+[INFO] DynamicONA. Step: 10760000. Time Elapsed: 10367.307 s. Mean Reward: -49.649. Std of Reward: 71.942. Training.
+[INFO] DynamicONA. Step: 10770000. Time Elapsed: 10394.439 s. Mean Reward: -50.023. Std of Reward: 91.179. Training.
+[INFO] DynamicONA. Step: 10780000. Time Elapsed: 10423.750 s. Mean Reward: -48.167. Std of Reward: 64.403. Training.
+[INFO] DynamicONA. Step: 10790000. Time Elapsed: 10450.820 s. Mean Reward: -42.222. Std of Reward: 34.727. Training.
+[INFO] DynamicONA. Step: 10800000. Time Elapsed: 10480.011 s. Mean Reward: -38.473. Std of Reward: 30.857. Training.
+[INFO] DynamicONA. Step: 10810000. Time Elapsed: 10505.972 s. Mean Reward: -51.596. Std of Reward: 54.523. Training.
+[INFO] DynamicONA. Step: 10820000. Time Elapsed: 10535.562 s. Mean Reward: -44.561. Std of Reward: 52.735. Training.
+[INFO] DynamicONA. Step: 10830000. Time Elapsed: 10563.696 s. Mean Reward: -35.862. Std of Reward: 28.435. Training.
+[INFO] DynamicONA. Step: 10840000. Time Elapsed: 10593.399 s. Mean Reward: -44.889. Std of Reward: 60.350. Training.
+[INFO] DynamicONA. Step: 10850000. Time Elapsed: 10620.550 s. Mean Reward: -46.415. Std of Reward: 61.934. Training.
+[INFO] DynamicONA. Step: 10860000. Time Elapsed: 10652.253 s. Mean Reward: -42.301. Std of Reward: 65.690. Training.
+[INFO] DynamicONA. Step: 10870000. Time Elapsed: 10679.844 s. Mean Reward: -43.359. Std of Reward: 42.315. Training.
+[INFO] DynamicONA. Step: 10880000. Time Elapsed: 10710.123 s. Mean Reward: -45.233. Std of Reward: 51.285. Training.
+[INFO] DynamicONA. Step: 10890000. Time Elapsed: 10739.907 s. Mean Reward: -39.010. Std of Reward: 38.958. Training.
+[INFO] DynamicONA. Step: 10900000. Time Elapsed: 10768.521 s. Mean Reward: -45.693. Std of Reward: 68.327. Training.
+[INFO] DynamicONA. Step: 10910000. Time Elapsed: 10797.396 s. Mean Reward: -43.886. Std of Reward: 55.257. Training.
+[INFO] DynamicONA. Step: 10920000. Time Elapsed: 10823.224 s. Mean Reward: -47.745. Std of Reward: 57.656. Training.
+[INFO] DynamicONA. Step: 10930000. Time Elapsed: 10853.325 s. Mean Reward: -45.508. Std of Reward: 54.924. Training.
+[INFO] DynamicONA. Step: 10940000. Time Elapsed: 10887.481 s. Mean Reward: -44.868. Std of Reward: 62.384. Training.
+[INFO] DynamicONA. Step: 10950000. Time Elapsed: 10917.277 s. Mean Reward: -54.249. Std of Reward: 83.133. Training.
+[INFO] DynamicONA. Step: 10960000. Time Elapsed: 10944.065 s. Mean Reward: -35.697. Std of Reward: 37.556. Training.
+[INFO] DynamicONA. Step: 10970000. Time Elapsed: 10973.606 s. Mean Reward: -46.172. Std of Reward: 56.907. Training.
+[INFO] DynamicONA. Step: 10980000. Time Elapsed: 11000.275 s. Mean Reward: -42.750. Std of Reward: 60.968. Training.
+[INFO] DynamicONA. Step: 10990000. Time Elapsed: 11030.250 s. Mean Reward: -47.468. Std of Reward: 71.095. Training.
+[INFO] DynamicONA. Step: 11000000. Time Elapsed: 11056.069 s. Mean Reward: -55.391. Std of Reward: 98.439. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-10999934.onnx
+[INFO] DynamicONA. Step: 11010000. Time Elapsed: 11085.349 s. Mean Reward: -48.125. Std of Reward: 49.308. Training.
+[INFO] DynamicONA. Step: 11020000. Time Elapsed: 11112.549 s. Mean Reward: -34.220. Std of Reward: 27.243. Training.
+[INFO] DynamicONA. Step: 11030000. Time Elapsed: 11142.178 s. Mean Reward: -38.006. Std of Reward: 29.072. Training.
+[INFO] DynamicONA. Step: 11040000. Time Elapsed: 11168.233 s. Mean Reward: -40.206. Std of Reward: 44.176. Training.
+[INFO] DynamicONA. Step: 11050000. Time Elapsed: 11197.322 s. Mean Reward: -36.445. Std of Reward: 35.480. Training.
+[INFO] DynamicONA. Step: 11060000. Time Elapsed: 11222.827 s. Mean Reward: -40.720. Std of Reward: 53.366. Training.
+[INFO] DynamicONA. Step: 11070000. Time Elapsed: 11251.842 s. Mean Reward: -39.109. Std of Reward: 44.942. Training.
+[INFO] DynamicONA. Step: 11080000. Time Elapsed: 11277.444 s. Mean Reward: -40.111. Std of Reward: 39.736. Training.
+[INFO] DynamicONA. Step: 11090000. Time Elapsed: 11306.642 s. Mean Reward: -31.368. Std of Reward: 22.467. Training.
+[INFO] DynamicONA. Step: 11100000. Time Elapsed: 11332.825 s. Mean Reward: -46.978. Std of Reward: 118.785. Training.
+[INFO] DynamicONA. Step: 11110000. Time Elapsed: 11363.414 s. Mean Reward: -40.891. Std of Reward: 50.129. Training.
+[INFO] DynamicONA. Step: 11120000. Time Elapsed: 11390.343 s. Mean Reward: -47.603. Std of Reward: 65.102. Training.
+[INFO] DynamicONA. Step: 11130000. Time Elapsed: 11421.817 s. Mean Reward: -44.013. Std of Reward: 51.305. Training.
+[INFO] DynamicONA. Step: 11140000. Time Elapsed: 11449.344 s. Mean Reward: -36.626. Std of Reward: 47.951. Training.
+[INFO] DynamicONA. Step: 11150000. Time Elapsed: 11479.668 s. Mean Reward: -47.835. Std of Reward: 64.481. Training.
+[INFO] DynamicONA. Step: 11160000. Time Elapsed: 11508.466 s. Mean Reward: -40.520. Std of Reward: 45.245. Training.
+[INFO] DynamicONA. Step: 11170000. Time Elapsed: 11538.503 s. Mean Reward: -43.218. Std of Reward: 43.078. Training.
+[INFO] DynamicONA. Step: 11180000. Time Elapsed: 11564.884 s. Mean Reward: -38.015. Std of Reward: 53.498. Training.
+[INFO] DynamicONA. Step: 11190000. Time Elapsed: 11594.053 s. Mean Reward: -37.053. Std of Reward: 30.141. Training.
+[INFO] DynamicONA. Step: 11200000. Time Elapsed: 11621.215 s. Mean Reward: -37.138. Std of Reward: 44.571. Training.
+[INFO] DynamicONA. Step: 11210000. Time Elapsed: 11651.669 s. Mean Reward: -40.860. Std of Reward: 47.414. Training.
+[INFO] DynamicONA. Step: 11220000. Time Elapsed: 11677.864 s. Mean Reward: -38.978. Std of Reward: 39.835. Training.
+[INFO] DynamicONA. Step: 11230000. Time Elapsed: 11707.584 s. Mean Reward: -42.997. Std of Reward: 54.682. Training.
+[INFO] DynamicONA. Step: 11240000. Time Elapsed: 11734.703 s. Mean Reward: -41.403. Std of Reward: 51.755. Training.
+[INFO] DynamicONA. Step: 11250000. Time Elapsed: 11764.930 s. Mean Reward: -39.196. Std of Reward: 44.095. Training.
+[INFO] DynamicONA. Step: 11260000. Time Elapsed: 11791.477 s. Mean Reward: -44.479. Std of Reward: 91.533. Training.
+[INFO] DynamicONA. Step: 11270000. Time Elapsed: 11821.142 s. Mean Reward: -44.114. Std of Reward: 49.151. Training.
+[INFO] DynamicONA. Step: 11280000. Time Elapsed: 11847.024 s. Mean Reward: -45.848. Std of Reward: 86.332. Training.
+[INFO] DynamicONA. Step: 11290000. Time Elapsed: 11877.839 s. Mean Reward: -32.586. Std of Reward: 42.220. Training.
+[INFO] DynamicONA. Step: 11300000. Time Elapsed: 11903.866 s. Mean Reward: -44.023. Std of Reward: 71.366. Training.
+[INFO] DynamicONA. Step: 11310000. Time Elapsed: 11930.236 s. Mean Reward: -35.486. Std of Reward: 45.950. Training.
+[INFO] DynamicONA. Step: 11320000. Time Elapsed: 11959.762 s. Mean Reward: -37.763. Std of Reward: 29.904. Training.
+[INFO] DynamicONA. Step: 11330000. Time Elapsed: 11986.480 s. Mean Reward: -38.852. Std of Reward: 36.610. Training.
+[INFO] DynamicONA. Step: 11340000. Time Elapsed: 12014.704 s. Mean Reward: -36.072. Std of Reward: 34.224. Training.
+[INFO] DynamicONA. Step: 11350000. Time Elapsed: 12039.820 s. Mean Reward: -38.081. Std of Reward: 58.315. Training.
+[INFO] DynamicONA. Step: 11360000. Time Elapsed: 12068.084 s. Mean Reward: -33.155. Std of Reward: 29.123. Training.
+[INFO] DynamicONA. Step: 11370000. Time Elapsed: 12093.897 s. Mean Reward: -33.275. Std of Reward: 30.370. Training.
+[INFO] DynamicONA. Step: 11380000. Time Elapsed: 12122.667 s. Mean Reward: -36.634. Std of Reward: 65.556. Training.
+[INFO] DynamicONA. Step: 11390000. Time Elapsed: 12148.602 s. Mean Reward: -31.411. Std of Reward: 28.839. Training.
+[INFO] DynamicONA. Step: 11400000. Time Elapsed: 12181.002 s. Mean Reward: -35.474. Std of Reward: 30.149. Training.
+[INFO] DynamicONA. Step: 11410000. Time Elapsed: 12214.640 s. Mean Reward: -35.809. Std of Reward: 40.917. Training.
+[INFO] DynamicONA. Step: 11420000. Time Elapsed: 12250.635 s. Mean Reward: -35.273. Std of Reward: 33.301. Training.
+[WARNING] Restarting worker[0] after 'The Unity environment took too long to respond. Make sure that :
+         The environment does not need user interaction to launch
+         The Agents' Behavior Parameters > Behavior Type is set to "Default"
+         The environment and the Python interface have compatible versions.
+         If you're running on a headless server without graphics support, turn off display by either passing --no-graphics option or build your Unity executable as server build.'
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+[INFO] Listening on port 5004. Start training by pressing the Play button in the Unity Editor.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-11426259.onnx
+[INFO] Copied results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-11426259.onnx to results\DynaONA_Stage2Extended\DynamicONA.onnx.
+Traceback (most recent call last):
+  File "C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\Scripts\mlagents-learn-script.py", line 33, in <module>
+    sys.exit(load_entry_point('mlagents', 'console_scripts', 'mlagents-learn')())
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\learn.py", line 267, in main
+    run_cli(parse_command_line())
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\learn.py", line 263, in run_cli
+    run_training(run_seed, options, num_areas)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\learn.py", line 137, in run_training
+    tc.start_learning(env_manager)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents-envs\mlagents_envs\timers.py", line 305, in wrapped
+    return func(*args, **kwargs)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\trainer_controller.py", line 175, in start_learning
+    n_steps = self.advance(env_manager)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents-envs\mlagents_envs\timers.py", line 305, in wrapped
+    return func(*args, **kwargs)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\trainer_controller.py", line 233, in advance
+    new_step_infos = env_manager.get_steps()
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\env_manager.py", line 124, in get_steps
+    new_step_infos = self._step()
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\subprocess_env_manager.py", line 420, in _step
+    self._restart_failed_workers(step)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\subprocess_env_manager.py", line 328, in _restart_failed_workers
+    self.reset(self.env_parameters)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\env_manager.py", line 68, in reset
+    self.first_step_infos = self._reset_env(config)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\subprocess_env_manager.py", line 446, in _reset_env
+    ew.previous_step = EnvironmentStep(ew.recv().payload, ew.worker_id, {}, {})
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\subprocess_env_manager.py", line 101, in recv
+    raise env_exception
+mlagents_envs.exception.UnityTimeOutException: The Unity environment took too long to respond. Make sure that :
+         The environment does not need user interaction to launch
+         The Agents' Behavior Parameters > Behavior Type is set to "Default"
+         The environment and the Python interface have compatible versions.
+         If you're running on a headless server without graphics support, turn off display by either passing --no-graphics option or build your Unity executable as server build.
+(MLPythonEnv) PS C:\Users\zeros\OneDrive\Documentos\MLAgents> mlagents-learn '.\TFG\TFG Unity Project\Assets\QuadAgent\Training\DynamicONA.yaml' --run-id=DynaONA_Stage2Extended --resume
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+
+            ┐  ╖
+        ╓╖╬│╡  ││╬╖╖
+    ╓╖╬│││││┘  ╬│││││╬╖
+ ╖╬│││││╬╜        ╙╬│││││╖╖                               ╗╗╗
+ ╬╬╬╬╖││╦╖        ╖╬││╗╣╣╣╬      ╟╣╣╬    ╟╣╣╣             ╜╜╜  ╟╣╣
+ ╬╬╬╬╬╬╬╬╖│╬╖╖╓╬╪│╓╣╣╣╣╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╒╣╣╖╗╣╣╣╗   ╣╣╣ ╣╣╣╣╣╣ ╟╣╣╖   ╣╣╣
+ ╬╬╬╬┐  ╙╬╬╬╬│╓╣╣╣╝╜  ╫╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╟╣╣╣╙ ╙╣╣╣  ╣╣╣ ╙╟╣╣╜╙  ╫╣╣  ╟╣╣
+ ╬╬╬╬┐     ╙╬╬╣╣      ╫╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╟╣╣╬   ╣╣╣  ╣╣╣  ╟╣╣     ╣╣╣┌╣╣╜
+ ╬╬╬╜       ╬╬╣╣      ╙╝╣╣╬      ╙╣╣╣╗╖╓╗╣╣╣╜ ╟╣╣╬   ╣╣╣  ╣╣╣  ╟╣╣╦╓    ╣╣╣╣╣
+ ╙   ╓╦╖    ╬╬╣╣   ╓╗╗╖            ╙╝╣╣╣╣╝╜   ╘╝╝╜   ╝╝╝  ╝╝╝   ╙╣╣╣    ╟╣╣╣
+   ╩╬╬╬╬╬╬╦╦╬╬╣╣╗╣╣╣╣╣╣╣╝                                             ╫╣╣╣╣
+      ╙╬╬╬╬╬╬╬╣╣╣╣╣╣╝╜
+          ╙╬╬╬╣╣╣╜
+             ╙
+
+ Version information:
+  ml-agents: 1.1.0.dev0,
+  ml-agents-envs: 1.1.0.dev0,
+  Communicator API: 1.5.0,
+  PyTorch: 2.1.1+cu121
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+[INFO] Listening on port 5004. Start training by pressing the Play button in the Unity Editor.
+[INFO] Connected to Unity environment with package version 2.0.1 and communication version 1.5.0
+[INFO] Connected new brain: DynamicONA?team=0
+[INFO] Hyperparameters for behavior name DynamicONA:
+        trainer_type:   ppo
+        hyperparameters:
+          batch_size:   2048
+          buffer_size:  20480
+          learning_rate:        0.0003
+          beta: 0.0005
+          epsilon:      0.2
+          lambd:        0.95
+          num_epoch:    3
+          shared_critic:        False
+          learning_rate_schedule:       linear
+          beta_schedule:        constant
+          epsilon_schedule:     linear
+        checkpoint_interval:    500000
+        network_settings:
+          normalize:    True
+          hidden_units: 512
+          num_layers:   3
+          vis_encode_type:      simple
+          memory:       None
+          goal_conditioning_type:       hyper
+          deterministic:        False
+        reward_signals:
+          extrinsic:
+            gamma:      0.99
+            strength:   1.0
+            network_settings:
+              normalize:        False
+              hidden_units:     128
+              num_layers:       2
+              vis_encode_type:  simple
+              memory:   None
+              goal_conditioning_type:   hyper
+              deterministic:    False
+        init_path:      None
+        keep_checkpoints:       5
+        even_checkpoints:       False
+        max_steps:      20000000
+        time_horizon:   1000
+        summary_freq:   10000
+        threaded:       False
+        self_play:      None
+        behavioral_cloning:     None
+[INFO] Resuming from results\DynaONA_Stage2Extended\DynamicONA.
+[INFO] Resuming training from step 11426259.
+[INFO] DynamicONA. Step: 11430000. Time Elapsed: 47.237 s. Mean Reward: -27.634. Std of Reward: 40.411. Training.
+[INFO] DynamicONA. Step: 11440000. Time Elapsed: 82.657 s. Mean Reward: -37.998. Std of Reward: 53.656. Training.
+[INFO] DynamicONA. Step: 11450000. Time Elapsed: 121.070 s. Mean Reward: -43.750. Std of Reward: 53.646. Training.
+[INFO] DynamicONA. Step: 11460000. Time Elapsed: 155.931 s. Mean Reward: -39.304. Std of Reward: 65.154. Training.
+[INFO] DynamicONA. Step: 11470000. Time Elapsed: 195.794 s. Mean Reward: -42.754. Std of Reward: 70.305. Training.
+[INFO] DynamicONA. Step: 11480000. Time Elapsed: 231.181 s. Mean Reward: -40.744. Std of Reward: 44.272. Training.
+[INFO] DynamicONA. Step: 11490000. Time Elapsed: 270.340 s. Mean Reward: -39.716. Std of Reward: 47.097. Training.
+[INFO] DynamicONA. Step: 11500000. Time Elapsed: 320.613 s. Mean Reward: -31.301. Std of Reward: 27.359. Training.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-11499974.onnx
+[INFO] DynamicONA. Step: 11510000. Time Elapsed: 370.585 s. Mean Reward: -40.314. Std of Reward: 38.519. Training.
+[INFO] DynamicONA. Step: 11520000. Time Elapsed: 405.057 s. Mean Reward: -33.907. Std of Reward: 35.326. Training.
+[INFO] DynamicONA. Step: 11530000. Time Elapsed: 443.931 s. Mean Reward: -35.103. Std of Reward: 30.879. Training.
+[INFO] DynamicONA. Step: 11540000. Time Elapsed: 478.590 s. Mean Reward: -59.713. Std of Reward: 100.603. Training.
+[INFO] DynamicONA. Step: 11550000. Time Elapsed: 521.577 s. Mean Reward: -33.205. Std of Reward: 25.256. Training.
+[INFO] DynamicONA. Step: 11560000. Time Elapsed: 556.347 s. Mean Reward: -36.718. Std of Reward: 32.320. Training.
+[INFO] DynamicONA. Step: 11570000. Time Elapsed: 601.262 s. Mean Reward: -42.576. Std of Reward: 58.461. Training.
+[INFO] DynamicONA. Step: 11580000. Time Elapsed: 636.162 s. Mean Reward: -39.336. Std of Reward: 54.165. Training.
+[INFO] DynamicONA. Step: 11590000. Time Elapsed: 682.281 s. Mean Reward: -34.815. Std of Reward: 34.441. Training.
+[INFO] DynamicONA. Step: 11600000. Time Elapsed: 720.373 s. Mean Reward: -39.363. Std of Reward: 48.621. Training.
+[INFO] DynamicONA. Step: 11610000. Time Elapsed: 761.511 s. Mean Reward: -34.292. Std of Reward: 32.459. Training.
+[INFO] DynamicONA. Step: 11620000. Time Elapsed: 800.203 s. Mean Reward: -34.057. Std of Reward: 32.768. Training.
+[INFO] DynamicONA. Step: 11630000. Time Elapsed: 836.037 s. Mean Reward: -40.764. Std of Reward: 51.586. Training.
+[INFO] DynamicONA. Step: 11640000. Time Elapsed: 883.415 s. Mean Reward: -34.553. Std of Reward: 42.502. Training.
+[INFO] DynamicONA. Step: 11650000. Time Elapsed: 917.574 s. Mean Reward: -46.485. Std of Reward: 87.766. Training.
+[INFO] DynamicONA. Step: 11660000. Time Elapsed: 964.567 s. Mean Reward: -34.224. Std of Reward: 33.982. Training.
+[INFO] DynamicONA. Step: 11670000. Time Elapsed: 1004.062 s. Mean Reward: -38.598. Std of Reward: 48.001. Training.
+[INFO] DynamicONA. Step: 11680000. Time Elapsed: 1043.264 s. Mean Reward: -38.175. Std of Reward: 39.150. Training.
+[INFO] DynamicONA. Step: 11690000. Time Elapsed: 1083.618 s. Mean Reward: -31.499. Std of Reward: 29.854. Training.
+[INFO] DynamicONA. Step: 11700000. Time Elapsed: 1123.621 s. Mean Reward: -38.888. Std of Reward: 46.960. Training.
+[INFO] DynamicONA. Step: 11710000. Time Elapsed: 1160.717 s. Mean Reward: -39.080. Std of Reward: 50.272. Training.
+[INFO] DynamicONA. Step: 11720000. Time Elapsed: 1200.219 s. Mean Reward: -38.354. Std of Reward: 58.310. Training.
+[INFO] DynamicONA. Step: 11730000. Time Elapsed: 1237.834 s. Mean Reward: -35.098. Std of Reward: 48.188. Training.
+[INFO] DynamicONA. Step: 11740000. Time Elapsed: 1278.638 s. Mean Reward: -37.939. Std of Reward: 47.781. Training.
+[INFO] DynamicONA. Step: 11750000. Time Elapsed: 1314.107 s. Mean Reward: -38.825. Std of Reward: 36.644. Training.
+[INFO] DynamicONA. Step: 11760000. Time Elapsed: 1353.679 s. Mean Reward: -38.122. Std of Reward: 37.332. Training.
+[INFO] DynamicONA. Step: 11770000. Time Elapsed: 1388.356 s. Mean Reward: -38.171. Std of Reward: 40.847. Training.
+[INFO] DynamicONA. Step: 11780000. Time Elapsed: 1425.165 s. Mean Reward: -37.033. Std of Reward: 32.330. Training.
+[INFO] DynamicONA. Step: 11790000. Time Elapsed: 1459.313 s. Mean Reward: -34.532. Std of Reward: 41.102. Training.
+[INFO] DynamicONA. Step: 11800000. Time Elapsed: 1496.615 s. Mean Reward: -36.396. Std of Reward: 36.455. Training.
+[INFO] DynamicONA. Step: 11810000. Time Elapsed: 1530.458 s. Mean Reward: -43.280. Std of Reward: 63.612. Training.
+[INFO] DynamicONA. Step: 11820000. Time Elapsed: 1569.324 s. Mean Reward: -29.338. Std of Reward: 27.623. Training.
+[INFO] DynamicONA. Step: 11830000. Time Elapsed: 1603.629 s. Mean Reward: -35.968. Std of Reward: 44.661. Training.
+[INFO] DynamicONA. Step: 11840000. Time Elapsed: 1642.234 s. Mean Reward: -32.363. Std of Reward: 36.916. Training.
+[INFO] DynamicONA. Step: 11850000. Time Elapsed: 1677.325 s. Mean Reward: -36.134. Std of Reward: 41.094. Training.
+[INFO] DynamicONA. Step: 11860000. Time Elapsed: 1716.176 s. Mean Reward: -36.841. Std of Reward: 51.072. Training.
+[INFO] DynamicONA. Step: 11870000. Time Elapsed: 1752.340 s. Mean Reward: -38.770. Std of Reward: 58.765. Training.
+[INFO] DynamicONA. Step: 11880000. Time Elapsed: 1791.683 s. Mean Reward: -33.158. Std of Reward: 31.548. Training.
+[INFO] DynamicONA. Step: 11890000. Time Elapsed: 1824.259 s. Mean Reward: -36.084. Std of Reward: 47.568. Training.
+[INFO] DynamicONA. Step: 11900000. Time Elapsed: 1861.392 s. Mean Reward: -34.583. Std of Reward: 42.764. Training.
+[INFO] DynamicONA. Step: 11910000. Time Elapsed: 1895.104 s. Mean Reward: -30.630. Std of Reward: 29.559. Training.
+[INFO] DynamicONA. Step: 11920000. Time Elapsed: 1930.445 s. Mean Reward: -43.367. Std of Reward: 90.015. Training.
+[INFO] DynamicONA. Step: 11930000. Time Elapsed: 1966.462 s. Mean Reward: -39.147. Std of Reward: 53.357. Training.
+[INFO] DynamicONA. Step: 11940000. Time Elapsed: 2002.670 s. Mean Reward: -49.036. Std of Reward: 115.726. Training.
+[INFO] DynamicONA. Step: 11950000. Time Elapsed: 2038.802 s. Mean Reward: -48.036. Std of Reward: 103.624. Training.
+[INFO] DynamicONA. Step: 11960000. Time Elapsed: 2066.113 s. Mean Reward: -42.407. Std of Reward: 127.715. Training.
+[INFO] Learning was interrupted. Please wait while the graph is generated.
+[INFO] Exported results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-11960678.onnx
+[INFO] Copied results\DynaONA_Stage2Extended\DynamicONA\DynamicONA-11960678.onnx to results\DynaONA_Stage2Extended\DynamicONA.onnx.
+(MLPythonEnv) PS C:\Users\zeros\OneDrive\Documentos\MLAgents> mlagents-learn '.\TFG\TFG Unity Project\Assets\QuadAgent\Training\DynamicONA.yaml' --run-id=DynaONA_Stage2Superextended --resume
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+
+            ┐  ╖
+        ╓╖╬│╡  ││╬╖╖
+    ╓╖╬│││││┘  ╬│││││╬╖
+ ╖╬│││││╬╜        ╙╬│││││╖╖                               ╗╗╗
+ ╬╬╬╬╖││╦╖        ╖╬││╗╣╣╣╬      ╟╣╣╬    ╟╣╣╣             ╜╜╜  ╟╣╣
+ ╬╬╬╬╬╬╬╬╖│╬╖╖╓╬╪│╓╣╣╣╣╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╒╣╣╖╗╣╣╣╗   ╣╣╣ ╣╣╣╣╣╣ ╟╣╣╖   ╣╣╣
+ ╬╬╬╬┐  ╙╬╬╬╬│╓╣╣╣╝╜  ╫╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╟╣╣╣╙ ╙╣╣╣  ╣╣╣ ╙╟╣╣╜╙  ╫╣╣  ╟╣╣
+ ╬╬╬╬┐     ╙╬╬╣╣      ╫╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╟╣╣╬   ╣╣╣  ╣╣╣  ╟╣╣     ╣╣╣┌╣╣╜
+ ╬╬╬╜       ╬╬╣╣      ╙╝╣╣╬      ╙╣╣╣╗╖╓╗╣╣╣╜ ╟╣╣╬   ╣╣╣  ╣╣╣  ╟╣╣╦╓    ╣╣╣╣╣
+ ╙   ╓╦╖    ╬╬╣╣   ╓╗╗╖            ╙╝╣╣╣╣╝╜   ╘╝╝╜   ╝╝╝  ╝╝╝   ╙╣╣╣    ╟╣╣╣
+   ╩╬╬╬╬╬╬╦╦╬╬╣╣╗╣╣╣╣╣╣╣╝                                             ╫╣╣╣╣
+      ╙╬╬╬╬╬╬╬╣╣╣╣╣╣╝╜
+          ╙╬╬╬╣╣╣╜
+             ╙
+
+ Version information:
+  ml-agents: 1.1.0.dev0,
+  ml-agents-envs: 1.1.0.dev0,
+  Communicator API: 1.5.0,
+  PyTorch: 2.1.1+cu121
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+[INFO] Listening on port 5004. Start training by pressing the Play button in the Unity Editor.
+[INFO] Connected to Unity environment with package version 2.0.1 and communication version 1.5.0
+[INFO] Connected new brain: DynamicONA?team=0
+[INFO] Hyperparameters for behavior name DynamicONA:
+        trainer_type:   ppo
+        hyperparameters:
+          batch_size:   2048
+          buffer_size:  20480
+          learning_rate:        0.0003
+          beta: 0.0005
+          epsilon:      0.2
+          lambd:        0.95
+          num_epoch:    3
+          shared_critic:        False
+          learning_rate_schedule:       linear
+          beta_schedule:        constant
+          epsilon_schedule:     linear
+        checkpoint_interval:    500000
+        network_settings:
+          normalize:    True
+          hidden_units: 512
+          num_layers:   3
+          vis_encode_type:      simple
+          memory:       None
+          goal_conditioning_type:       hyper
+          deterministic:        False
+        reward_signals:
+          extrinsic:
+            gamma:      0.99
+            strength:   1.0
+            network_settings:
+              normalize:        False
+              hidden_units:     128
+              num_layers:       2
+              vis_encode_type:  simple
+              memory:   None
+              goal_conditioning_type:   hyper
+              deterministic:    False
+        init_path:      None
+        keep_checkpoints:       5
+        even_checkpoints:       False
+        max_steps:      20000000
+        time_horizon:   1000
+        summary_freq:   10000
+        threaded:       False
+        self_play:      None
+        behavioral_cloning:     None
+[INFO] Resuming from results\DynaONA_Stage2Superextended\DynamicONA.
+[INFO] Resuming training from step 11960678.
+[INFO] Learning was interrupted. Please wait while the graph is generated.
+[INFO] Exported results\DynaONA_Stage2Superextended\DynamicONA\DynamicONA-11960698.onnx
+[INFO] Copied results\DynaONA_Stage2Superextended\DynamicONA\DynamicONA-11960698.onnx to results\DynaONA_Stage2Superextended\DynamicONA.onnx.
+[ERROR] SubprocessEnvManager had workers that didn't signal shutdown
+[WARNING] Unable to save configuration to results\DynaONA_Stage2Superextended\configuration.yaml. Make sure the directory exists
+[WARNING] Unable to save to results\DynaONA_Stage2Superextended\run_logs\timers.json. Make sure the directory exists
+Traceback (most recent call last):
+  File "C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\Scripts\mlagents-learn-script.py", line 33, in <module>
+    sys.exit(load_entry_point('mlagents', 'console_scripts', 'mlagents-learn')())
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\learn.py", line 267, in main
+    run_cli(parse_command_line())
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\learn.py", line 263, in run_cli
+    run_training(run_seed, options, num_areas)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\learn.py", line 142, in run_training
+    write_training_status(run_logs_dir)
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\learn.py", line 160, in write_training_status
+    GlobalTrainingStatus.save_state(os.path.join(output_dir, TRAINING_STATUS_FILE_NAME))
+  File "c:\users\zeros\onedrive\documentos\mlagents\ml-agents\ml-agents\mlagents\trainers\training_status.py", line 96, in save_state
+    with open(path, "w") as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'results\\DynaONA_Stage2Superextended\\run_logs\\training_status.json'
+(MLPythonEnv) PS C:\Users\zeros\OneDrive\Documentos\MLAgents> mlagents-learn '.\TFG\TFG Unity Project\Assets\QuadAgent\Training\DynamicONA.yaml' --run-id=DynaONA_Stage3 --resume
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+
+            ┐  ╖
+        ╓╖╬│╡  ││╬╖╖
+    ╓╖╬│││││┘  ╬│││││╬╖
+ ╖╬│││││╬╜        ╙╬│││││╖╖                               ╗╗╗
+ ╬╬╬╬╖││╦╖        ╖╬││╗╣╣╣╬      ╟╣╣╬    ╟╣╣╣             ╜╜╜  ╟╣╣
+ ╬╬╬╬╬╬╬╬╖│╬╖╖╓╬╪│╓╣╣╣╣╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╒╣╣╖╗╣╣╣╗   ╣╣╣ ╣╣╣╣╣╣ ╟╣╣╖   ╣╣╣
+ ╬╬╬╬┐  ╙╬╬╬╬│╓╣╣╣╝╜  ╫╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╟╣╣╣╙ ╙╣╣╣  ╣╣╣ ╙╟╣╣╜╙  ╫╣╣  ╟╣╣
+ ╬╬╬╬┐     ╙╬╬╣╣      ╫╣╣╣╬      ╟╣╣╬    ╟╣╣╣ ╟╣╣╬   ╣╣╣  ╣╣╣  ╟╣╣     ╣╣╣┌╣╣╜
+ ╬╬╬╜       ╬╬╣╣      ╙╝╣╣╬      ╙╣╣╣╗╖╓╗╣╣╣╜ ╟╣╣╬   ╣╣╣  ╣╣╣  ╟╣╣╦╓    ╣╣╣╣╣
+ ╙   ╓╦╖    ╬╬╣╣   ╓╗╗╖            ╙╝╣╣╣╣╝╜   ╘╝╝╜   ╝╝╝  ╝╝╝   ╙╣╣╣    ╟╣╣╣
+   ╩╬╬╬╬╬╬╦╦╬╬╣╣╗╣╣╣╣╣╣╣╝                                             ╫╣╣╣╣
+      ╙╬╬╬╬╬╬╬╣╣╣╣╣╣╝╜
+          ╙╬╬╬╣╣╣╜
+             ╙
+
+ Version information:
+  ml-agents: 1.1.0.dev0,
+  ml-agents-envs: 1.1.0.dev0,
+  Communicator API: 1.5.0,
+  PyTorch: 2.1.1+cu121
+C:\Users\zeros\OneDrive\Documentos\MLAgents\python-envs\MLPythonEnv\lib\site-packages\torch\__init__.py:614: UserWarning: torch.set_default_tensor_type() is deprecated as of PyTorch 2.1, please use torch.set_default_dtype() and torch.set_default_device() as alternatives. (Triggered internally at ..\torch\csrc\tensor\python_tensor.cpp:453.)
+  _C._set_default_tensor_type(t)
+[INFO] Listening on port 5004. Start training by pressing the Play button in the Unity Editor.
+[INFO] Connected to Unity environment with package version 2.0.1 and communication version 1.5.0
+[INFO] Connected new brain: DynamicONA?team=0
+[INFO] Hyperparameters for behavior name DynamicONA:
+        trainer_type:   ppo
+        hyperparameters:
+          batch_size:   2048
+          buffer_size:  20480
+          learning_rate:        0.0003
+          beta: 0.0005
+          epsilon:      0.2
+          lambd:        0.95
+          num_epoch:    3
+          shared_critic:        False
+          learning_rate_schedule:       linear
+          beta_schedule:        constant
+          epsilon_schedule:     linear
+        checkpoint_interval:    500000
+        network_settings:
+          normalize:    True
+          hidden_units: 512
+          num_layers:   3
+          vis_encode_type:      simple
+          memory:       None
+          goal_conditioning_type:       hyper
+          deterministic:        False
+        reward_signals:
+          extrinsic:
+            gamma:      0.99
+            strength:   1.0
+            network_settings:
+              normalize:        False
+              hidden_units:     128
+              num_layers:       2
+              vis_encode_type:  simple
+              memory:   None
+              goal_conditioning_type:   hyper
+              deterministic:    False
+        init_path:      None
+        keep_checkpoints:       5
+        even_checkpoints:       False
+        max_steps:      20000000
+        time_horizon:   1000
+        summary_freq:   10000
+        threaded:       False
+        self_play:      None
+        behavioral_cloning:     None
+[INFO] Resuming from results\DynaONA_Stage3\DynamicONA.
+[INFO] Resuming training from step 11960698.
+[INFO] DynamicONA. Step: 11970000. Time Elapsed: 34.327 s. Mean Reward: -56.579. Std of Reward: 48.134. Training.
+[INFO] DynamicONA. Step: 11980000. Time Elapsed: 60.222 s. Mean Reward: -69.481. Std of Reward: 97.504. Training.
+[INFO] DynamicONA. Step: 11990000. Time Elapsed: 88.108 s. Mean Reward: -69.269. Std of Reward: 62.100. Training.
+[INFO] DynamicONA. Step: 12000000. Time Elapsed: 113.374 s. Mean Reward: -65.817. Std of Reward: 51.989. Training.
+[INFO] Exported results\DynaONA_Stage3\DynamicONA\DynamicONA-11999993.onnx
+[INFO] DynamicONA. Step: 12010000. Time Elapsed: 141.494 s. Mean Reward: -65.472. Std of Reward: 92.332. Training.
+[INFO] DynamicONA. Step: 12020000. Time Elapsed: 166.890 s. Mean Reward: -59.288. Std of Reward: 61.030. Training.
+[INFO] DynamicONA. Step: 12030000. Time Elapsed: 197.947 s. Mean Reward: -63.256. Std of Reward: 51.459. Training.
+[INFO] DynamicONA. Step: 12040000. Time Elapsed: 226.019 s. Mean Reward: -77.088. Std of Reward: 124.389. Training.
+[INFO] DynamicONA. Step: 12050000. Time Elapsed: 256.873 s. Mean Reward: -57.044. Std of Reward: 42.029. Training.
+[INFO] DynamicONA. Step: 12060000. Time Elapsed: 286.779 s. Mean Reward: -65.972. Std of Reward: 90.682. Training.
+[INFO] DynamicONA. Step: 12070000. Time Elapsed: 319.122 s. Mean Reward: -70.585. Std of Reward: 98.231. Training.
+[INFO] DynamicONA. Step: 12080000. Time Elapsed: 348.347 s. Mean Reward: -65.204. Std of Reward: 81.510. Training.
+[INFO] DynamicONA. Step: 12090000. Time Elapsed: 382.092 s. Mean Reward: -75.171. Std of Reward: 106.071. Training.
+[INFO] DynamicONA. Step: 12100000. Time Elapsed: 411.692 s. Mean Reward: -59.245. Std of Reward: 56.626. Training.
+[INFO] DynamicONA. Step: 12110000. Time Elapsed: 443.606 s. Mean Reward: -63.637. Std of Reward: 73.921. Training.
+[INFO] DynamicONA. Step: 12120000. Time Elapsed: 473.375 s. Mean Reward: -63.987. Std of Reward: 70.629. Training.
+[INFO] DynamicONA. Step: 12130000. Time Elapsed: 504.831 s. Mean Reward: -74.404. Std of Reward: 97.105. Training.
+[INFO] DynamicONA. Step: 12140000. Time Elapsed: 535.312 s. Mean Reward: -65.955. Std of Reward: 78.687. Training.
+[INFO] DynamicONA. Step: 12150000. Time Elapsed: 567.816 s. Mean Reward: -78.998. Std of Reward: 141.958. Training.
+[INFO] DynamicONA. Step: 12160000. Time Elapsed: 596.723 s. Mean Reward: -56.202. Std of Reward: 40.490. Training.
+[INFO] DynamicONA. Step: 12170000. Time Elapsed: 629.763 s. Mean Reward: -62.335. Std of Reward: 64.676. Training.
+[INFO] DynamicONA. Step: 12180000. Time Elapsed: 658.900 s. Mean Reward: -61.353. Std of Reward: 77.006. Training.
+[INFO] DynamicONA. Step: 12190000. Time Elapsed: 691.761 s. Mean Reward: -72.156. Std of Reward: 111.140. Training.
+[INFO] DynamicONA. Step: 12200000. Time Elapsed: 720.460 s. Mean Reward: -56.572. Std of Reward: 46.799. Training.
+[INFO] DynamicONA. Step: 12210000. Time Elapsed: 751.154 s. Mean Reward: -62.758. Std of Reward: 57.911. Training.
+[INFO] DynamicONA. Step: 12220000. Time Elapsed: 779.104 s. Mean Reward: -59.935. Std of Reward: 77.176. Training.
+[INFO] DynamicONA. Step: 12230000. Time Elapsed: 809.970 s. Mean Reward: -64.493. Std of Reward: 127.880. Training.
+[INFO] DynamicONA. Step: 12240000. Time Elapsed: 840.213 s. Mean Reward: -63.609. Std of Reward: 99.259. Training.
+[INFO] DynamicONA. Step: 12250000. Time Elapsed: 871.633 s. Mean Reward: -65.634. Std of Reward: 81.927. Training.
+[INFO] DynamicONA. Step: 12260000. Time Elapsed: 900.301 s. Mean Reward: -63.333. Std of Reward: 73.628. Training.
+[INFO] DynamicONA. Step: 12270000. Time Elapsed: 931.879 s. Mean Reward: -55.934. Std of Reward: 46.957. Training.
+[INFO] DynamicONA. Step: 12280000. Time Elapsed: 961.960 s. Mean Reward: -54.885. Std of Reward: 70.237. Training.
+[INFO] DynamicONA. Step: 12290000. Time Elapsed: 995.774 s. Mean Reward: -56.129. Std of Reward: 53.879. Training.
+[INFO] DynamicONA. Step: 12300000. Time Elapsed: 1024.309 s. Mean Reward: -48.280. Std of Reward: 28.686. Training.
+[INFO] DynamicONA. Step: 12310000. Time Elapsed: 1055.064 s. Mean Reward: -72.723. Std of Reward: 138.828. Training.
+[INFO] DynamicONA. Step: 12320000. Time Elapsed: 1084.588 s. Mean Reward: -68.422. Std of Reward: 103.397. Training.
+[INFO] DynamicONA. Step: 12330000. Time Elapsed: 1116.747 s. Mean Reward: -54.255. Std of Reward: 57.919. Training.
+[INFO] DynamicONA. Step: 12340000. Time Elapsed: 1145.914 s. Mean Reward: -67.962. Std of Reward: 136.752. Training.
+[INFO] DynamicONA. Step: 12350000. Time Elapsed: 1176.528 s. Mean Reward: -77.429. Std of Reward: 136.914. Training.
+[INFO] DynamicONA. Step: 12360000. Time Elapsed: 1208.944 s. Mean Reward: -61.043. Std of Reward: 52.263. Training.
+[INFO] DynamicONA. Step: 12370000. Time Elapsed: 1239.601 s. Mean Reward: -74.625. Std of Reward: 146.546. Training.
+[INFO] DynamicONA. Step: 12380000. Time Elapsed: 1270.466 s. Mean Reward: -55.405. Std of Reward: 77.105. Training.
+[INFO] DynamicONA. Step: 12390000. Time Elapsed: 1306.610 s. Mean Reward: -71.901. Std of Reward: 160.458. Training.
+[INFO] DynamicONA. Step: 12400000. Time Elapsed: 1344.498 s. Mean Reward: -71.591. Std of Reward: 98.713. Training.
+[INFO] DynamicONA. Step: 12410000. Time Elapsed: 1379.539 s. Mean Reward: -62.857. Std of Reward: 75.213. Training.
+[INFO] DynamicONA. Step: 12420000. Time Elapsed: 1418.252 s. Mean Reward: -47.541. Std of Reward: 37.780. Training.
+[INFO] DynamicONA. Step: 12430000. Time Elapsed: 1453.036 s. Mean Reward: -54.052. Std of Reward: 53.072. Training.
+[INFO] DynamicONA. Step: 12440000. Time Elapsed: 1489.768 s. Mean Reward: -62.616. Std of Reward: 94.670. Training.
+[INFO] DynamicONA. Step: 12450000. Time Elapsed: 1522.955 s. Mean Reward: -51.768. Std of Reward: 62.104. Training.
