@@ -497,7 +497,7 @@ public class DynamicONA : Agent
             
             int obstacleLayer = LayerMask.NameToLayer("obstacle");
             int layerMask = 1 << obstacleLayer;
-            bool obstacles_found = Physics.CheckSphere(position, 5.0f, layerMask);
+            bool obstacles_found = Physics.CheckSphere(position, 3.0f, layerMask);
             if (!obstacles_found){
                 // GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 // sphere.transform.position = position;
@@ -537,6 +537,15 @@ public class DynamicONA : Agent
             target = subgoal.gameObj.transform;
         }
 
+        // function to draw a temporal sphere at a given point
+        public void drawSphere(Vector3 position, float radius=0.5f){
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.GetComponent<Collider>().enabled = false;
+            sphere.transform.position = position;
+            sphere.transform.localScale = new Vector3(radius, radius, radius);
+            Destroy(sphere, 0.5f);
+        }
+
         public List<DynaObstacle> launchRaycastSet(Vector3 origin, float length=10.0f, int n=5, float angle=30.0f, string targetTag="obstacle"){
             
             Vector3 agentForward = Vector3.Normalize(transform.forward);
@@ -555,7 +564,7 @@ public class DynamicONA : Agent
                 if (raycastResult.gameObject.tag == "obstacle")
                 {
                     obstacleFound = true;
-                    // Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                    Debug.Log("Raycast hit object with name: " + raycastResult.name);
                     DynaObstacle newObstacle = new DynaObstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
                     if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle))
                         foundObstacles.Add(newObstacle);
@@ -564,6 +573,8 @@ public class DynamicONA : Agent
                 Vector3 raycastEnd = origin + agentForward * length;
                 Subgoal candidate = addCandidate(raycastEnd, Color.red);
                 if (candidate != null) subgoalCandidates.Add(candidate);
+                // draw a sphere at the end of the ray
+                // drawSphere(raycastEnd);
             }
 
             // Side raycasts
@@ -578,7 +589,7 @@ public class DynamicONA : Agent
                 {
                     if (raycastResult.gameObject.tag == "obstacle"){
                         obstacleFound = true;
-                        // Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                        Debug.Log("Raycast hit object with name: " + raycastResult.name);
                         DynaObstacle newObstacle = new DynaObstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
                         if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle))
                             foundObstacles.Add(newObstacle);
@@ -587,15 +598,17 @@ public class DynamicONA : Agent
                     Vector3 raycastEnd = origin + directionPos * length;
                     Subgoal candidate = addCandidate(raycastEnd, Color.green);
                     if (candidate != null) subgoalCandidates.Add(candidate);
+                    // draw a sphere at the end of the ray
+                    // drawSphere(raycastEnd);
                 }
 
                 // Negative raycast
-                raycastResult = launchRaycast(origin, directionNeg, length, targetTag, Color.blue);
+                raycastResult = launchRaycast(origin, directionNeg, length, targetTag, Color.yellow);
                 if (raycastResult != null)
                 {
                     if (raycastResult.gameObject.tag == "obstacle"){
                         obstacleFound = true;
-                        // Debug.Log("Raycast hit object with name: " + raycastResult.name);
+                        Debug.Log("Raycast hit object with name: " + raycastResult.name);
                         DynaObstacle newObstacle = new DynaObstacle(raycastResult.transform.name, raycastResult.transform.position, raycastResult.transform);
                         if (foundObstacles.Count < numObstacles && !foundObstacles.Contains(newObstacle))
                             foundObstacles.Add(newObstacle);
@@ -604,19 +617,24 @@ public class DynamicONA : Agent
                     Vector3 raycastEnd = origin + directionNeg * length;
                     Subgoal candidate = addCandidate(raycastEnd, Color.blue);
                     if (candidate != null) subgoalCandidates.Add(candidate);
+                    // draw a sphere at the end of the ray
+                    // drawSphere(raycastEnd);
                 }
 
                 // Find the best subgoal candidate to avoid the obstacle
                 if (obstacleFound){
+                    Debug.Log("Number of subgoal candidates: " + subgoalCandidates.Count);
                     Subgoal bestCandidate = findBestSubgoal(subgoalCandidates);
                     if (bestCandidate != null){
                         if (!chasingSubgoal){
                             // If not already chasing a subgoal, set the new subgoal to avoid the obstacle
+                            Debug.Log("New subgoal best candidate found and set!");
                             bestCandidate.gameObj = setNewSubgoal(bestCandidate.position);
                             currentSubgoal = bestCandidate;
                             chasingSubgoal = true;
                             setSubgoalAsTarget(currentSubgoal);
                         } else {
+                            Debug.Log("New subgoal found; check if it is better than the current one");
                             // If already chasing a subgoal, check if the new subgoal is better than the current one
                             float subgoalDistanceToTarget = bestCandidate.distanceToTarget;
                             float ratio = subgoalDistanceToTarget / currentSubgoal.distanceToTarget;
@@ -636,7 +654,16 @@ public class DynamicONA : Agent
                                 Destroy(currentSubgoal.gameObj);
                                 currentSubgoal = bestCandidate;
                             }
+
+                            // if (ratio < 0.75){
+                            //     bestCandidate.gameObj = setNewSubgoal(bestCandidate.position);
+                            //     setSubgoalAsTarget(bestCandidate);
+                            //     Destroy(currentSubgoal.gameObj);
+                            //     currentSubgoal = bestCandidate;
+                            // }
                         }
+                    } else {
+                        Debug.Log("No subgoal best candidate found");
                     }
                 }
             }
@@ -668,7 +695,6 @@ public class DynamicONA : Agent
             }
 
             return currentObstacles;
-            // return foundObstacles;
         }
 
     #endregion
@@ -679,7 +705,7 @@ public class DynamicONA : Agent
         /// Punish the agent if it is touching the limits
         /// </summary>
         /// <returns>
-        public void punishTouchingLimits(float weight = 0.1f){
+        public void punishTouchingLimits(float weight = 1f){
             if (touchingLimits()){
                 // Debug.Log("Agent is touching the limits (-0.1)");
                 AddReward(-1f*weight);
@@ -731,19 +757,6 @@ public class DynamicONA : Agent
             prevDistanceToTarget = currentDistanceToTarget;
         }
 
-        /// <summary>
-        /// Reward the agent for decreasing the minimum distance record to the target. Punish it for increasing the distance to the target
-        /// </summary>
-        public void rewardDistanceToTarget_hard(float weight = 1.0f){
-            
-            float currentDistanceToTarget = Utilities.distanceTo(transform.position, target.position, x: true, y: false, z: true);
-
-            float reward = currentDistanceToTarget < prevDistanceToTarget? 1 * weight : -1 * weight;
-            // Debug.Log("Distance to target reward: " + reward);
-            AddReward(reward);
-            prevDistanceToTarget = currentDistanceToTarget < prevDistanceToTarget? currentDistanceToTarget : prevDistanceToTarget;
-        }
-
         public void rewardTargetAlignment(float weight = 1.0f){
             Vector3 agentForward = Vector3.Normalize(transform.forward);
             agentForward.y = 0;
@@ -770,46 +783,6 @@ public class DynamicONA : Agent
             }
         }
 
-        public void rewardSmoothMovement(float weight = 1.0f){
-            
-            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-            {
-                float effectiveStrength = joint.Value.effectiveStrength;
-                float maxJointStrength = joint.Value.maxStrength;
-                float strengthRatio = effectiveStrength / maxJointStrength;
-                float reward = - strengthRatio * weight;
-
-                AddReward(reward);
-            }
-
-        }
-
-        public void punishBruteRotations(float weight = 1.0f){
-            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-            {
-                Quaternion prevRotation = joint.Value.prevRotation;
-                Quaternion targetRotation = joint.Value.joint.targetRotation;
-                float angle = Utilities.getQuaternionAngle(prevRotation, targetRotation);
-                float normalizedAngle = Utilities.normalizeAngle(angle);
-
-                float punishment = - normalizedAngle * weight;
-                AddReward(punishment);
-            }
-        }
-
-        public void punishBruteRotationsFromInit(float weight = 1.0f){
-            foreach (KeyValuePair<Transform, AgentJoint> joint in joints)
-            {
-                Quaternion prevRotation = joint.Value.initialRotation;
-                Quaternion targetRotation = joint.Value.joint.targetRotation;
-                float angle = Utilities.getQuaternionAngle(prevRotation, targetRotation);
-                float normalizedAngle = Utilities.normalizeAngle(angle);
-
-                float punishment = - normalizedAngle * weight;
-                AddReward(punishment);
-            }
-        }
-    
 
         /// <summary>
         /// Punish the agent for walking with the knees
@@ -825,30 +798,6 @@ public class DynamicONA : Agent
 
             float punishment = - (frontKneeStepping_R + frontKneeStepping_L + backKneeStepping_R + backKneeStepping_L) * weight;
             AddReward(punishment);
-        }
-
-
-        /// [SOON TO BE DEPRECATED]
-        /// <summary>
-        /// Reward the agent for walking correctly, punish him for standing still
-        /// </summary>
-        /// <param name="weight">
-        /// Weight of the punishment
-        /// </param>
-        public void rewardPawStep(float weight = 0.1f){
-            float frontPawStepping_R = frontLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
-            float frontPawStepping_L = frontLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
-            float backPawStepping_R = backLowerLeg_R.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
-            float backPawStepping_L = backLowerLeg_L.GetComponent<checkPawGrounded>().pawIsGrounded()? 1f: 0f;
-
-            float pawsStepping = (frontPawStepping_R + frontPawStepping_L + backPawStepping_R + backPawStepping_L);
-            if (pawsStepping <= 3){
-                float reward = 1 * weight;
-                AddReward(reward);
-            } else {
-                float punishment = - 1 * weight;
-                AddReward(punishment);
-            }
         }
 
         public void punishBumpyMovement(float lowerLimit = -1.0f, float upperLimit = 1.0f, float weight = 1.0f){
@@ -1010,8 +959,6 @@ public class DynamicONA : Agent
                 Vector3 agentPosition = GetComponent<Rigidbody>().worldCenterOfMass;
                 maxDistanceToGround = Utilities.checkDistanceToGround(agentPosition, groundLayer);
             }
-
-
         }
 
         public override void CollectObservations(VectorSensor sensor)
@@ -1054,12 +1001,6 @@ public class DynamicONA : Agent
                 sensor.AddObservation(joint.Value.rigidbody.velocity);
                 sensor.AddObservation(joint.Value.rigidbody.angularVelocity);
 
-                // Angular difference between the rotation taken in the last step and the one before that (size 1 * 12 = 12)
-                // UNDER TESTING
-                // float angle = Utilities.getQuaternionAngle(joint.Value.initialRotation, joint.Value.joint.targetRotation);
-                // float normalizedAngle = Utilities.normalizeAngle(angle);
-                // sensor.AddObservation(normalizedAngle);
-
                 // Effective strength in the last step (size 1 * 12 = 12)
                 sensor.AddObservation(joint.Value.effectiveStrength);
 
@@ -1067,7 +1008,7 @@ public class DynamicONA : Agent
                 sensor.AddObservation(Utilities.isTouching(joint.Value.transform, ground) ? 1 : 0);
             }
         
-            // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 3 + 1 + 108 + 12 + 12 + 15 = 165
+            // Total observation space size: 3 + 1 + 3 + 3 + 4 + 3 + 3 + 1 + 108 + 12 + 12 = 153
         }
 
         public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -1089,29 +1030,16 @@ public class DynamicONA : Agent
         
             // STAGE 1
                 
-                // PHASE 1
-                    rewardDistanceToTarget_easy(weight: 0.5f);
-                    rewardTargetAlignment(weight: 0.5f);
-                // PHASE 2
-                    // rewardDistanceToTarget_hard(weight: 0.5f);
+            rewardDistanceToTarget_easy(weight: 0.5f);
+            rewardTargetAlignment(weight: 0.5f);
 
             // STAGE 2
             punishKneeStep(weight: 1f); // max -4
-            rewardDistanceToGround(weight: 0.20f);
-            punishTouchingGround(weight: 0.10f);
-            rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.2f, targetPawHeightWeight: 0.3f);
+            rewardDistanceToGround(weight: 0.5f);
             rewardGroundAlignment(weight: 1f);            
+            punishTouchingGround(weight: 0.30f);
             punishUnevenWaistHeights(weight: 0.30f);
-
-            // STAGE 3
-            // punishBumpyMovement(weight: 0.1f);
-                        
-
-            // STAGE 3
-            // Allow crossedContactsWegight and targetPawHeightWeight
-            
-            // STAGE 4
-            // Activate obstacle spawning
+            rewardWalkGait(tooManyContactsWeight: 1f, crossedContactsWeight: 0.2f, targetPawHeightWeight: 0.3f);
 
         }
 
@@ -1124,11 +1052,7 @@ public class DynamicONA : Agent
             // Punish the agent if it fell 
             punishFalling(weight: 0.1f);
             // Punish the agent if it is touching the limits
-            punishTouchingLimits();
-            // Punish the agent if it is touching an obstacle
-            // if (obstaclesOn){
-            //     punishTouchingObstacles(weight: 0.5f);
-            // }
+            punishTouchingLimits(weight: 0.1f);
             
 
             if(obstaclesOn){
@@ -1140,64 +1064,5 @@ public class DynamicONA : Agent
 
         }
 
-        // void Update() {
-        //     if(Input.GetKeyDown(KeyCode.Space)){
-        //         Debug.Log("Resetting the environment");
-        //         ResetObstacles();
-        //         // ResetTarget();
-        //         // ResetAgent();
-        //     }
-        // }
-
     #endregion
-
-
-    
-
-    // // Start is called before the first frame update
-    // void Start()
-    // {
-    //     setUpJoints();
-    //     (groundWitdh, groundHeight) = Utilities.getWidthHeight(ground);
-    //     // Initial obstacles
-    //     currentObstacles = new List<DynaObstacle>();
-    //     if (generateObstacles){
-    //         for (int i = 0; i < numObstacles; i++)
-    //         {
-    //             currentObstacles.Add(new DynaObstacle("none", new Vector3(-1.0f, -1.0f, -1.0f)));
-    //         }
-    //     }
-
-    //     // Initial random position for the target and the agent
-    //     setRandomTargetPosition();
-    //     setRandomAgentPosition();
-
-    //     // Initial obstacles
-    //     obstacleManager.placeObstacles(numObstacles, transform.parent.parent);
-    // }
-    // // Update is called once per frame
-    // void Update()
-    // {
-    //     // drawToTargetGuideline();
-    //     // agentFell();
-    //     // drawKneeToGround();
-    //     // drawPawToGround();
-    //     findObstacles();
-    //     punishDistanceToObs();
-
-    //     //Print name of the obstacles found in a single line
-    //     string obstaclesFound = "";
-    //     foreach (DynaObstacle obstacle in currentObstacles)
-    //     {
-    //         obstaclesFound += obstacle.name + " ";
-    //     }
-    //     Debug.Log("Obstacles found: " + obstaclesFound);
-
-    //     isTouchingObstacle();
-    //     if(Input.GetKeyDown(KeyCode.Space)){
-    //         ResetObstacles();
-    //         ResetTarget();
-    //         ResetAgent();
-    //     }
-    // }
 }

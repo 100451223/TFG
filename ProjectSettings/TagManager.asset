@@ -9,6 +9,7 @@ TagManager:
   - target
   - obstacle
   - subgoal
+  - limit
   layers:
   - Default
   - TransparentFX
